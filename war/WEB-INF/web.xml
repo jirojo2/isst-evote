@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<web-app xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+xmlns="http://java.sun.com/xml/ns/javaee"
+xmlns:web="http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd"
+xsi:schemaLocation="http://java.sun.com/xml/ns/javaee
+http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd" version="2.5">
+	<servlet>
+		<servlet-name>Procesar Voto</servlet-name>
+		<servlet-class>es.upm.dit.isst.evote.crv.ProcesarVotoServlet</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>Procesar Voto</servlet-name>
+		<url-pattern>/voto</url-pattern>
+	</servlet-mapping>
+	<servlet>
+		<servlet-name>Resultados Votacion</servlet-name>
+		<servlet-class>es.upm.dit.isst.evote.crv.ResultadosVotacionServlet</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>Resultados Votacion</servlet-name>
+		<url-pattern>/resultados</url-pattern>
+	</servlet-mapping>
+	<servlet>
+		<servlet-name>Test Data</servlet-name>
+		<servlet-class>es.upm.dit.isst.evote.crv.TestDataServlet</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>Test Data</servlet-name>
+		<url-pattern>/test</url-pattern>
+	</servlet-mapping>
+</web-app>
