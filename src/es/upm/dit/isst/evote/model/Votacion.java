@@ -1,6 +1,7 @@
 package es.upm.dit.isst.evote.model;
 
 import java.io.Serializable;
+import java.util.Date;
 
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -18,7 +19,9 @@ public class Votacion implements Serializable
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Key id;
 	
-	private String nombre;
+	private String nombre;	
+	private Date fechaInicio;
+	private Date fechaFin;
 	
 	public Key id()
 	{
@@ -33,5 +36,15 @@ public class Votacion implements Serializable
 	public String nombre()
 	{
 		return nombre;
+	}
+
+	public Date fechaInicio()
+	{
+		return fechaInicio;
+	}
+
+	public Date fechaFin()
+	{
+		return fechaFin;
 	}
 }

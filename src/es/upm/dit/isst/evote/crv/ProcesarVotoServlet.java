@@ -14,6 +14,8 @@ import javax.servlet.http.HttpServletResponse;
 import es.upm.dit.isst.evote.crv.dao.CRVDAO;
 import es.upm.dit.isst.evote.model.CEE;
 import es.upm.dit.isst.evote.model.Candidato;
+import es.upm.dit.isst.evote.model.Escuela;
+import es.upm.dit.isst.evote.model.MesaElectoral;
 import es.upm.dit.isst.evote.model.Votacion;
 import es.upm.dit.isst.evote.model.Voto;
 
@@ -26,17 +28,21 @@ public class ProcesarVotoServlet extends HttpServlet
 	{
 		long id_votacion = Long.parseLong(req.getParameter("id_votacion"));
 		long id_cee = Long.parseLong(req.getParameter("id_cee"));
+		long id_escuela = Long.parseLong(req.getParameter("id_escuela"));
+		long id_mesa = Long.parseLong(req.getParameter("id_mesa"));
 		long id_candidato = Long.parseLong(req.getParameter("id_candidato"));
 		long timestamp = Long.parseLong(req.getParameter("timestamp"));
 		String firma = req.getParameter("firma");
 		
 		Votacion votacion = CRVDAO.instance.findVotacionById(id_votacion);
 		CEE cee = CRVDAO.instance.findCEEById(id_cee);
+		Escuela escuela = CRVDAO.instance.findEscuelaById(id_escuela);
+		MesaElectoral mesa = CRVDAO.instance.findMesaElectoralById(id_mesa);
 		Candidato candidato = CRVDAO.instance.findCandidatoById(id_candidato);	
 		
 		PrintWriter out = null;
 		
-		Voto voto = new Voto(votacion, cee, candidato, timestamp, firma);
+		Voto voto = new Voto(votacion, cee, escuela, mesa, candidato, timestamp, firma);
 		try
 		{
 			out = res.getWriter();

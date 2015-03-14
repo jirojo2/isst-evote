@@ -10,7 +10,9 @@
 
   <!-- Configure java.util.logging -->
   <system-properties>
-    <property name="java.util.logging.config.file" value="WEB-INF/logging.properties"/>
+    <property name="java.util.logging.config.file" value="WEB-INF/logging.properties"/>    
+    <property name="file.encoding" value="UTF-8" />
+    <property name="DEFAULT_ENCODING" value="UTF-8" />
   </system-properties>
 
   <!--
@@ -28,4 +30,14 @@
     http://code.google.com/appengine/docs/java/config/appconfig.html#Enabling_Sessions
   -->
 
+  <public-root>/frontend</public-root>
+  <static-files>
+    <include path="/frontend/**.png" />
+    <include path="/frontend/**.gif" />
+    <include path="/frontend/**.jpg" />
+    <include path="/frontend/**.css" />
+    <include path="/frontend/**.js" />
+    <include path="/frontend/**.html" />
+    <include path="/frontend/**.pdf" />
+  </static-files>
 </appengine-web-app>

@@ -18,12 +18,24 @@ public class ResultadosVotacionServlet extends HttpServlet
 	@Override
 	public void doGet(HttpServletRequest req, HttpServletResponse res)
 	{
-		long id_votacion = Long.parseLong(req.getParameter("id")); 
+		long id_votacion = 0L;
+		
+		if (req.getParameter("id") == null)
+		{
+			id_votacion = CRVDAO.instance.ultimaVotacionId();
+		} 
+		else
+		{
+			id_votacion = Long.parseLong(req.getParameter("id"));
+		}
 		
 		Votacion votacion = CRVDAO.instance.findVotacionById(id_votacion);
-		ResultadosVotacion resultados = CRV.instance.resultadosVotacion(votacion);
+		ResultadosVotacionPorEscuelas resultados = CRV.instance.resultadosVotacionPorEscuelas(votacion);
+		//ResultadosVotacion resultados = CRV.instance.resultadosVotacion(votacion);
 		
 		Gson gson = new Gson();
+		
+		res.setContentType("application/json; charset=UTF-8");
 		
 		try
 		{

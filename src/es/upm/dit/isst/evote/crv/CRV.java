@@ -16,6 +16,7 @@ import org.apache.commons.codec.binary.Base64;
 import es.upm.dit.isst.evote.crv.dao.CRVDAO;
 import es.upm.dit.isst.evote.model.CEE;
 import es.upm.dit.isst.evote.model.Candidato;
+import es.upm.dit.isst.evote.model.Escuela;
 import es.upm.dit.isst.evote.model.Votacion;
 import es.upm.dit.isst.evote.model.Voto;
 
@@ -74,6 +75,26 @@ public class CRV
 		{
 			int votos = CRVDAO.instance.votosCandidatoVotacion(candidato, votacion);
 			resultados.votosDelCandidato(candidato, votos);
+		}
+		
+		return resultados;
+	}
+	
+	public ResultadosVotacionPorEscuelas resultadosVotacionPorEscuelas(Votacion votacion)
+	{
+		ResultadosVotacion globales = this.resultadosVotacion(votacion);
+		ResultadosVotacionPorEscuelas resultados = new ResultadosVotacionPorEscuelas(globales);
+		
+		List<Candidato> candidatos = CRVDAO.instance.candidatosVotacion(votacion);
+		List<Escuela> escuelas = CRVDAO.instance.escuelasVotacion(votacion);
+		for (Escuela escuela : escuelas) {
+			ResultadosVotacion local = new ResultadosVotacion();
+			for (Candidato candidato : candidatos)
+			{
+				int votos = CRVDAO.instance.votosCandidatoEscuelaVotacion(candidato, escuela, votacion);				
+				local.votosDelCandidato(candidato, votos);
+			}
+			resultados.escuela(escuela, local);
 		}
 		
 		return resultados;

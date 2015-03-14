@@ -6,6 +6,9 @@ import java.util.List;
 import es.upm.dit.isst.evote.crv.dao.CRVDAO;
 import es.upm.dit.isst.evote.model.Candidato;
 
+/**
+ * Obtiene los datos de una votación, preparados para exportarse como JSON.
+ */
 public class ResultadosVotacion
 {
 	public class CandidatoVoto
