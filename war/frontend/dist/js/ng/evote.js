@@ -1,6 +1,9 @@
 angular
 	.module('evote', [])
-	.controller('Resultados', ['$scope', '$http', function($scope, $http) {
+	.controller('CACtrl', ['$scope', '$http', function($scope, $http) {
+	
+	}])
+	.controller('ResultadosCtrl', ['$scope', '$http', function($scope, $http) {
 	
 		$scope.resultados = null;
 		$scope.escuelas = [];
@@ -13,7 +16,7 @@ angular
 		window.scope = $scope;
 		
 		$http
-			.get('/resultados')
+			.get('/dist/js/ng/resultados.json')
 			.success(function(data) {
 				$scope.resultados = data;
 				$scope.totalVotos = 0;
@@ -116,7 +119,7 @@ angular
 				//String - A legend template
 				legendTemplate: "<ul class=\"<%=name.toLowerCase()%>-legend\"><% for (var i=0; i<segments.length; i++){%><li><span style=\"background-color:<%=segments[i].fillColor%>\"></span><%if(segments[i].label){%><%=segments[i].label%><%}%></li><%}%></ul>",
 				//String - A tooltip template
-				tooltipTemplate: "<%=label%>: <%=value %>% votos"
+				tooltipTemplate: "<%=label%>: <%=value.toFixed(2) %>% votos"
 			};
 			//Create pie or douhnut chart 
 			$scope.grafico = pieChart.Doughnut(PieData, pieOptions);

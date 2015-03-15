@@ -6,7 +6,7 @@ scratch. This page gets rid of all links and provides the needed markup only.
 <html>
 <head>
 <meta charset="UTF-8">
-<title>eVote</title>
+<title>eVote | CRV</title>
 <meta
 	content='width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no'
 	name='viewport'>
@@ -58,13 +58,13 @@ scratch. This page gets rid of all links and provides the needed markup only.
   
   -->
 <body class="skin-blue" ng-app="evote">
-	<div class="wrapper" ng-controller="CACtrl">
+	<div class="wrapper" ng-controller="ResultadosCtrl">
 
 		<!-- Main Header -->
 		<header class="main-header">
 
 			<!-- Logo -->
-			<a href="index2.html" class="logo"><b>eVote</b></a>
+			<a href="index2.html" class="logo"><b>eVote</b>CRV</a>
 
 			<!-- Header Navbar -->
 			<nav class="navbar navbar-static-top" role="navigation">
@@ -82,15 +82,13 @@ scratch. This page gets rid of all links and provides the needed markup only.
 
 				<!-- Sidebar Menu -->
 				<ul class="sidebar-menu">
-					<li class="header">eVote</li>
-					<li class="active">
-						<a href><span>Índice</span></a>
+					<li class="header">Resultados por Escuelas</li>
+					<!-- Optionally, you can add icons to the links -->
+					<li ng-class="{ active: activo == 'Globales' }">
+						<a href ng-click="resultadosEscuela()"><span>Resultados Globales</span></a>
 					</li>
-					<li>
-						<a href="/mockup/ca.html"><span>Obtener certificado para voto electrónico</span></a>
-					</li>
-					<li>
-						<a href="/mockup/resultados.html"><span>Resultados de las últimas elecciones</span></a>
+					<li ng-repeat="escuela in escuelas" ng-class="{ active: activo == escuela }">
+						<a href ng-click="resultadosEscuela(escuela)">{{ escuela }}</a>
 					</li>
 				</ul>
 				<!-- /.sidebar-menu -->
@@ -103,31 +101,64 @@ scratch. This page gets rid of all links and provides the needed markup only.
 			<!-- Content Header (Page header) -->
 			<section class="content-header">
 				<h1>
-					eVote <small>Íncide</small>
+					Resultados {{ activo }} <small>Recuento de votos</small>
 				</h1>
 				<ol class="breadcrumb">
-					<li class="active">
+					<li>
 						<a href="#">
 							<i class="fa fa-dashboard"></i> 
 							Mockup eVote
 						</a>
 					</li>
+					<li class="active">Resultados {{ activo }}</li>
 				</ol>
 			</section>
 
 			<!-- Main content -->
 			<section class="content">
 
-				 <!-- general form elements -->
-			    <div class="box box-primary">
-			        <div class="box-header">
-			            <h3 class="box-title">Índice</h3>
-			        </div><!-- /.box-header -->		        
-			
-		            <div class="box-footer">
-		                Elija una acción en el menu de la izquierda.
-		            </div>
-			    </div><!-- /.box -->
+				<!-- Cajas Candidatos -->
+				<h1>Resultados por candidato</h1>
+
+				<div class="row">
+
+					<div class="col-md-4 col-sm-6 col-xs-12" ng-repeat="i in r.recuento | orderBy:'votos':true ">
+						<div class="info-box bg-{{ colorCandidato(i.candidato) }}">
+							<span class="info-box-icon"><i class="fa fa-user"></i></span>
+							<div class="info-box-content">
+								<span class="info-box-text">{{ i.candidato.nombre }} {{ i.candidato.apellidos }}</span>
+								<span class="info-box-number">{{ i.votos }} votos</span>
+								<div class="progress">
+									<div class="progress-bar" style="width: {{ porcentajeVotos(i.votos, r.totalVotos) }}%"></div>
+								</div>
+								<span class="progress-description"> {{ porcentajeVotos(i.votos, r.totalVotos) | number:2 }}% </span>
+							</div>
+							<!-- /.info-box-content -->
+						</div>
+						<!-- /.info-box -->
+					</div>
+
+				</div>
+
+				<!-- Chart Votos -->
+				<h1>Resultados por votos</h1>
+				<div class="row">
+					<div class='col-md-8'>
+						<div class="chart-responsive">
+							<canvas id="votesPieChart" height="500"></canvas>
+						</div>
+						<!-- ./chart-responsive -->
+					</div>
+					<!-- /.col -->
+					<div class="col-md-4">
+						<ul class="chart-legend clearfix">
+							<li ng-repeat="i in r.recuento">
+								<i class="fa fa-circle-o text-{{ colorCandidato(i.candidato) }}"></i> 
+								{{ i.candidato.nombre }} {{ i.candidato.apellidos }}
+							</li>
+						</ul>
+					</div>
+				</div>
 
 			</section>
 			<!-- /.content -->
@@ -137,7 +168,7 @@ scratch. This page gets rid of all links and provides the needed markup only.
 		<!-- Main Footer -->
 		<footer class="main-footer">
 			<!-- To the right -->
-			<div class="pull-right hidden-xs">Prototipo eVote</div>
+			<div class="pull-right hidden-xs">Prototipo eVote CRV</div>
 			<!-- Default to the left -->
 			<strong>ISST 2015 - Grupo <a href="#">eVote</a>.
 			</strong>

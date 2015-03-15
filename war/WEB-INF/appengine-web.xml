@@ -37,6 +37,7 @@
     <include path="/frontend/**.jpg" />
     <include path="/frontend/**.css" />
     <include path="/frontend/**.js" />
+    <include path="/frontend/**.json" />
     <include path="/frontend/**.html" />
     <include path="/frontend/**.pdf" />
   </static-files>
