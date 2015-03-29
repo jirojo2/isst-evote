@@ -37,7 +37,7 @@ public class Voto implements Serializable
 
 	@ManyToOne(fetch=FetchType.EAGER)
 	@Unowned
-	private MesaElectoral mesa;
+	private Sector sector;
 	
 	@ManyToOne(fetch=FetchType.EAGER)
 	@Unowned
@@ -53,33 +53,30 @@ public class Voto implements Serializable
 	 */
 	private long timestamp;
 	
-	private float ponderacion;
+	/**
+	 * Número aleatorio generado por el CEE, incluído en la firma.
+	 */
+	private long nonce;
 	
 	/**
 	 * Base64 encoded SHA512withRSA, firma emitida por el CEE emisor del voto
-	 * Incluye los campos id_votacion, id_cee, id_escuela, id_mesa, id_candidato, timestamp (CEE)
+	 * Incluye los campos id_votacion, id_cee, id_escuela, id_sector, id_candidato, timestamp (CEE), nonce (CEE)
 	 */
 	private String firma;
 	
-	public Voto(Votacion votacion, CEE cee, Escuela escuela, MesaElectoral mesa, Candidato candidato, long timestamp, String firma, float ponderacion)
+	public Voto(Votacion votacion, CEE cee, Escuela escuela, Sector sector, Candidato candidato, long timestamp, long nonce, String firma)
 	{
 		this.votacion = votacion;
 		this.cee = cee;
 		this.escuela = escuela;
-		this.mesa = mesa;
+		this.sector = sector;
 		this.candidato = candidato;
 		
-		this.ponderacion = ponderacion;
-		
 		this.timestampEmitido = timestamp;
+		this.nonce = nonce;
 		this.firma = firma;
 		
 		this.timestamp = new Date().getTime();
-	}
-	
-	public Voto(Votacion votacion, CEE cee, Escuela escuela, MesaElectoral mesa, Candidato candidato, long timestamp, String firma)
-	{
-		this(votacion, cee, escuela, mesa, candidato, timestamp, firma, 1.0f);
 	}
 	
 	public Key id()
@@ -102,19 +99,14 @@ public class Voto implements Serializable
 		return escuela;
 	}
 
-	public MesaElectoral mesa()
+	public Sector sector()
 	{
-		return mesa;
+		return sector;
 	}
 	
 	public Candidato candidato()
 	{
 		return candidato;
-	}
-
-	public float ponderacion()
-	{
-		return ponderacion;
 	}
 
 	public long timestamp()
@@ -133,18 +125,19 @@ public class Voto implements Serializable
 	}
 	
 	/**
-	 * Incluye los campos id_votacion, id_cee, id_escuela, id_mesa, id_candidato, timestamp (CEE)
+	 * Incluye los campos id_votacion, id_cee, id_escuela, id_mesa, id_candidato, timestamp (CEE), nonce (CEE)
 	 * @return ByteBuffer preparado para comprobar la firma del voto con la clave pública del CEE
 	 */
 	public ByteBuffer datosParaValidarFirma()
 	{
-		ByteBuffer buffer = ByteBuffer.allocate(48);
+		ByteBuffer buffer = ByteBuffer.allocate(56);
 		buffer.putLong(votacion.id().getId());
 		buffer.putLong(cee.id().getId());
 		buffer.putLong(escuela.id().getId());
-		buffer.putLong(mesa.id().getId());
+		buffer.putLong(sector.id().getId());
 		buffer.putLong(candidato.id().getId());
 		buffer.putLong(timestampEmitido);
+		buffer.putLong(nonce);
 		return buffer;
 	}
 }

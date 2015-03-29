@@ -8,6 +8,7 @@ import java.security.KeyPairGenerator;
 import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
 import java.security.PublicKey;
+import java.security.SecureRandom;
 import java.security.Signature;
 import java.security.SignatureException;
 import java.util.Date;
@@ -21,7 +22,7 @@ import org.apache.commons.codec.binary.Base64;
 import es.upm.dit.isst.evote.model.CEE;
 import es.upm.dit.isst.evote.model.Candidato;
 import es.upm.dit.isst.evote.model.Escuela;
-import es.upm.dit.isst.evote.model.MesaElectoral;
+import es.upm.dit.isst.evote.model.Sector;
 import es.upm.dit.isst.evote.model.Votacion;
 import es.upm.dit.isst.evote.model.Voto;
 import es.upm.dit.isst.evote.crv.dao.CRVDAO;
@@ -30,20 +31,45 @@ public class TestDataServlet extends HttpServlet
 {
 	private static final long serialVersionUID = 1118083128547257020L;
 	
-	private String firma(PrivateKey privateKey, Votacion votacion, CEE cee, Escuela escuela, MesaElectoral mesa, Candidato candidato, long timestamp) throws NoSuchAlgorithmException, InvalidKeyException, SignatureException
+	public class VotoSimulado
+	{		
+		private Voto voto;
+		
+		public VotoSimulado(PrivateKey privateKey, Votacion votacion, CEE cee, Escuela escuela, Sector sector, Candidato candidato) throws NoSuchAlgorithmException, InvalidKeyException, SignatureException
+		{
+			long timestamp = new Date().getTime();
+			long nonce = generarNonce();
+			String firma = firma(privateKey, votacion, cee, escuela, sector, candidato, timestamp, nonce);
+			voto = new Voto(votacion, cee, escuela, sector, candidato, timestamp, nonce, firma);
+		}
+		
+		public Voto voto()
+		{
+			return this.voto;
+		}
+	}
+	
+	private String firma(PrivateKey privateKey, Votacion votacion, CEE cee, Escuela escuela, Sector sector, Candidato candidato, long timestamp, long nonce) throws NoSuchAlgorithmException, InvalidKeyException, SignatureException
 	{
-		ByteBuffer buffer = ByteBuffer.allocate(48);
+		ByteBuffer buffer = ByteBuffer.allocate(56);
 		buffer.putLong(votacion.id().getId());
 		buffer.putLong(cee.id().getId());
 		buffer.putLong(escuela.id().getId());
-		buffer.putLong(mesa.id().getId());
+		buffer.putLong(sector.id().getId());
 		buffer.putLong(candidato.id().getId());
 		buffer.putLong(timestamp);
+		buffer.putLong(nonce);
 		
 		Signature signature = Signature.getInstance("SHA512withRSA");
 		signature.initSign(privateKey);
 		signature.update(buffer);
 		return Base64.encodeBase64String(signature.sign());
+	}
+	
+	private Long generarNonce() throws NoSuchAlgorithmException
+	{
+		SecureRandom sr = SecureRandom.getInstance("NativePRNG");
+		return sr.nextLong();
 	}
 
 	@Override
@@ -76,10 +102,13 @@ public class TestDataServlet extends HttpServlet
 		CEE cee = new CEE("Test Center", Base64.encodeBase64String(publicKey.getEncoded()));
 		
 		Escuela escuela = new Escuela("ETSIT");
-		MesaElectoral mesa = new MesaElectoral("00000", escuela);
+		
+		Sector sector1 = new Sector("PDI con vinculación permanente", 0.51f);
+		Sector sector2 = new Sector("PDI sin vinculación permanente", 0.16f);
+		Sector sector3 = new Sector("PAS", 0.09f);
+		Sector sector4 = new Sector("Alumnos", 0.24f);
 
 		Escuela escuela2 = new Escuela("ETSII");
-		MesaElectoral mesa2 = new MesaElectoral("00100", escuela2);
 		
 		CRVDAO.instance.registrar(candidato1);
 		CRVDAO.instance.registrar(candidato2);
@@ -87,24 +116,22 @@ public class TestDataServlet extends HttpServlet
 		CRVDAO.instance.registrar(votacion);
 		CRVDAO.instance.registrar(cee);
 		CRVDAO.instance.registrar(escuela);
-		CRVDAO.instance.registrar(mesa);
 		CRVDAO.instance.registrar(escuela2);
-		CRVDAO.instance.registrar(mesa2);
-		
-		long timestamp = new Date().getTime();
+		CRVDAO.instance.registrar(sector1);
+		CRVDAO.instance.registrar(sector2);
+		CRVDAO.instance.registrar(sector3);
+		CRVDAO.instance.registrar(sector4);
 		
 		try
-		{
-			System.out.println("Signature: " + firma(privateKey, votacion, cee, escuela, mesa, candidato1, timestamp));
-			
-			Voto voto1 = new Voto(votacion, cee, escuela, mesa, candidato1, timestamp, firma(privateKey, votacion, cee, escuela, mesa, candidato1, timestamp));
-			Voto voto2 = new Voto(votacion, cee, escuela, mesa, candidato1, timestamp, firma(privateKey, votacion, cee, escuela, mesa, candidato1, timestamp));
-			Voto voto3 = new Voto(votacion, cee, escuela, mesa, candidato2, timestamp, firma(privateKey, votacion, cee, escuela, mesa, candidato2, timestamp));
-			Voto voto4 = new Voto(votacion, cee, escuela, mesa, candidato1, timestamp, firma(privateKey, votacion, cee, escuela, mesa, candidato1, timestamp));
-			Voto voto5 = new Voto(votacion, cee, escuela2, mesa2, candidato1, timestamp, firma(privateKey, votacion, cee, escuela2, mesa2, candidato1, timestamp));
-			Voto voto6 = new Voto(votacion, cee, escuela2, mesa2, candidato2, timestamp, firma(privateKey, votacion, cee, escuela2, mesa2, candidato2, timestamp));
-			Voto voto7 = new Voto(votacion, cee, escuela2, mesa2, candidato2, timestamp, firma(privateKey, votacion, cee, escuela2, mesa2, candidato2, timestamp));
-			Voto voto8 = new Voto(votacion, cee, escuela2, mesa2, candidato3, timestamp, firma(privateKey, votacion, cee, escuela2, mesa2, candidato3, timestamp));
+		{			
+			Voto voto1 = new VotoSimulado(privateKey, votacion, cee, escuela, sector1, candidato1).voto();
+			Voto voto2 = new VotoSimulado(privateKey, votacion, cee, escuela, sector1, candidato1).voto();
+			Voto voto3 = new VotoSimulado(privateKey, votacion, cee, escuela, sector1, candidato2).voto();
+			Voto voto4 = new VotoSimulado(privateKey, votacion, cee, escuela, sector1, candidato1).voto();
+			Voto voto5 = new VotoSimulado(privateKey, votacion, cee, escuela2, sector1, candidato1).voto();
+			Voto voto6 = new VotoSimulado(privateKey, votacion, cee, escuela2, sector1, candidato2).voto();
+			Voto voto7 = new VotoSimulado(privateKey, votacion, cee, escuela2, sector1, candidato2).voto();
+			Voto voto8 = new VotoSimulado(privateKey, votacion, cee, escuela2, sector1, candidato3).voto();
 			
 			CRV.instance.procesarVoto(voto1);
 			CRV.instance.procesarVoto(voto2);

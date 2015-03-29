@@ -9,7 +9,7 @@ import javax.persistence.Query;
 import es.upm.dit.isst.evote.model.CEE;
 import es.upm.dit.isst.evote.model.Candidato;
 import es.upm.dit.isst.evote.model.Escuela;
-import es.upm.dit.isst.evote.model.MesaElectoral;
+import es.upm.dit.isst.evote.model.Sector;
 import es.upm.dit.isst.evote.model.Votacion;
 import es.upm.dit.isst.evote.model.Voto;
 
@@ -39,10 +39,10 @@ public class CRVDAO
 		return em.find(Escuela.class, id);
 	}
 	
-	public MesaElectoral findMesaElectoralById(long id)
+	public Sector findSectorById(long id)
 	{
 		EntityManager em = EMFService.get().createEntityManager();
-		return em.find(MesaElectoral.class, id);
+		return em.find(Sector.class, id);
 	}
 	
 	public Candidato findCandidatoById(long id)
@@ -134,10 +134,10 @@ public class CRVDAO
 		em.close();
 	}
 	
-	public synchronized void registrar(MesaElectoral mesa)
+	public synchronized void registrar(Sector sector)
 	{
 		EntityManager em = EMFService.get().createEntityManager();
-		em.persist(mesa);
+		em.persist(sector);
 		em.close();
 	}
 	
