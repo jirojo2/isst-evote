@@ -9,6 +9,7 @@ import javax.servlet.http.HttpServletResponse;
 import com.google.gson.Gson;
 
 import es.upm.dit.isst.evote.crv.dao.CRVDAO;
+import es.upm.dit.isst.evote.crv.json.ResultadosVotacionPorEscuelas;
 import es.upm.dit.isst.evote.model.Votacion;
 
 public class ResultadosVotacionServlet extends HttpServlet

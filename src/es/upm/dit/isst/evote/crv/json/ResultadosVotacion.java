@@ -1,4 +1,4 @@
-package es.upm.dit.isst.evote.crv;
+package es.upm.dit.isst.evote.crv.json;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -7,7 +7,13 @@ import es.upm.dit.isst.evote.crv.dao.CRVDAO;
 import es.upm.dit.isst.evote.model.Candidato;
 
 /**
- * Obtiene los datos de una votación, preparados para exportarse como JSON.
+ * Obtiene los datos de una votaciÃ³n, preparados para exportarse como JSON.
+ * <hr>
+ * Se deben mostrar: 
+ * <ul>
+ *  <li>El total de votos contabilizados</li>
+ *  <li>El porcentaje ponderado</li>
+ * </ul>
  */
 public class ResultadosVotacion
 {
@@ -15,6 +21,7 @@ public class ResultadosVotacion
 	{
 		private Candidato candidato;
 		private int votos;
+		private double total;
 		
 		public CandidatoVoto(Candidato candidato, int votos)
 		{
@@ -30,6 +37,11 @@ public class ResultadosVotacion
 		public int votos()
 		{
 			return votos;
+		}
+		
+		public double total()
+		{
+			return total;
 		}
 	}
 	

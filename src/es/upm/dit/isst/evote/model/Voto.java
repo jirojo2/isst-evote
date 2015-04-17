@@ -54,7 +54,7 @@ public class Voto implements Serializable
 	private long timestamp;
 	
 	/**
-	 * Número aleatorio generado por el CEE, incluído en la firma.
+	 * Nï¿½mero aleatorio generado por el CEE, incluï¿½do en la firma.
 	 */
 	private long nonce;
 	
@@ -124,9 +124,16 @@ public class Voto implements Serializable
 		return firma;
 	}
 	
+	public float ponderacion()
+	{
+		if (sector == null)
+			return 0.0f;
+		return sector.ponderacion();
+	}
+	
 	/**
 	 * Incluye los campos id_votacion, id_cee, id_escuela, id_mesa, id_candidato, timestamp (CEE), nonce (CEE)
-	 * @return ByteBuffer preparado para comprobar la firma del voto con la clave pública del CEE
+	 * @return ByteBuffer preparado para comprobar la firma del voto con la clave pï¿½blica del CEE
 	 */
 	public ByteBuffer datosParaValidarFirma()
 	{

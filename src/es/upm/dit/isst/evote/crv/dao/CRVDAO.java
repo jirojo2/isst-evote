@@ -100,6 +100,9 @@ public class CRVDAO
 		Query q = em.createQuery("select v from Voto v where votacion = :votacion and candidato = :candidato");
 		q.setParameter("votacion", votacion.id());
 		q.setParameter("candidato", candidato.id());
+		
+		// TODO: Votos por sectores, pero no mezclar los números => NO DAR DECIMALES 
+		
 		return q.getResultList().size();
 	}
 	

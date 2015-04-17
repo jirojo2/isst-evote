@@ -51,19 +51,19 @@ public class TestDataServlet extends HttpServlet
 	
 	private String firma(PrivateKey privateKey, Votacion votacion, CEE cee, Escuela escuela, Sector sector, Candidato candidato, long timestamp, long nonce) throws NoSuchAlgorithmException, InvalidKeyException, SignatureException
 	{
-		ByteBuffer buffer = ByteBuffer.allocate(56);
-		buffer.putLong(votacion.id().getId());
-		buffer.putLong(cee.id().getId());
-		buffer.putLong(escuela.id().getId());
-		buffer.putLong(sector.id().getId());
-		buffer.putLong(candidato.id().getId());
-		buffer.putLong(timestamp);
-		buffer.putLong(nonce);
+		ByteBuffer buffer = ByteBuffer.allocate(56); // total, 56 Byte
+		buffer.putLong(votacion.id().getId());  // votaciÃ³n en curso
+		buffer.putLong(cee.id().getId());       // cee emisor (1 si solo hay uno)
+		buffer.putLong(escuela.id().getId());   // no se si vamos a mantener esto
+		buffer.putLong(sector.id().getId());    // sector al que pertenece el votante (ponderaciÃ³n)
+		buffer.putLong(candidato.id().getId()); // candidato votado
+		buffer.putLong(timestamp);              // timestamp con precisiÃ³n de ms
+		buffer.putLong(nonce);                  // nonce aleatorio que usamos para confirmar y evitar replays, 64 bit
 		
 		Signature signature = Signature.getInstance("SHA512withRSA");
 		signature.initSign(privateKey);
 		signature.update(buffer);
-		return Base64.encodeBase64String(signature.sign());
+		return Base64.encodeBase64String(signature.sign()); // la firma se codifica en base64
 	}
 	
 	private Long generarNonce() throws NoSuchAlgorithmException
@@ -94,17 +94,17 @@ public class TestDataServlet extends HttpServlet
 		
 		System.out.println("CEE publicKey: " + Base64.encodeBase64String(publicKey.getEncoded()));
 				
-		Candidato candidato1 = new Candidato("00000000X", "José Ignacio", "Rojo Rivero");
-		Candidato candidato2 = new Candidato("00000000Y", "Roberto", "Paterna Ferrón");
-		Candidato candidato3 = new Candidato("00000000Z", "Jorge", "Díez de la Fuente");
+		Candidato candidato1 = new Candidato("00000000X", "Josï¿½ Ignacio", "Rojo Rivero");
+		Candidato candidato2 = new Candidato("00000000Y", "Roberto", "Paterna Ferrï¿½n");
+		Candidato candidato3 = new Candidato("00000000Z", "Jorge", "Dï¿½ez de la Fuente");
 		
-		Votacion votacion = new Votacion("Votación de prueba");
+		Votacion votacion = new Votacion("Votaciï¿½n de prueba");
 		CEE cee = new CEE("Test Center", Base64.encodeBase64String(publicKey.getEncoded()));
 		
 		Escuela escuela = new Escuela("ETSIT");
 		
-		Sector sector1 = new Sector("PDI con vinculación permanente", 0.51f);
-		Sector sector2 = new Sector("PDI sin vinculación permanente", 0.16f);
+		Sector sector1 = new Sector("PDI con vinculaciï¿½n permanente", 0.51f);
+		Sector sector2 = new Sector("PDI sin vinculaciï¿½n permanente", 0.16f);
 		Sector sector3 = new Sector("PAS", 0.09f);
 		Sector sector4 = new Sector("Alumnos", 0.24f);
 

@@ -1,4 +1,4 @@
-package es.upm.dit.isst.evote.crv;
+package es.upm.dit.isst.evote.crv.json;
 
 import java.util.ArrayList;
 import java.util.List;
