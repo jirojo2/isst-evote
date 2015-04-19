@@ -304,6 +304,8 @@ public class Simulator
 		{
 			votoSimulado = new VotoSimulado(escuela, sector, candidato);
 			
+			// TODO - IMPORTANTE
+			// El voto no tiene que guardarse en la base de datos, sino que tiene que enviarse mediante un POST al Servlet del CRV
 			EntityManager em = emf.createEntityManager();
 			em.persist(votoSimulado.voto());
 			em.close();	
