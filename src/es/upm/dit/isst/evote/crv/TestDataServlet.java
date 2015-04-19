@@ -94,17 +94,17 @@ public class TestDataServlet extends HttpServlet
 		
 		System.out.println("CEE publicKey: " + Base64.encodeBase64String(publicKey.getEncoded()));
 				
-		Candidato candidato1 = new Candidato("00000000X", "Jos� Ignacio", "Rojo Rivero");
-		Candidato candidato2 = new Candidato("00000000Y", "Roberto", "Paterna Ferr�n");
-		Candidato candidato3 = new Candidato("00000000Z", "Jorge", "D�ez de la Fuente");
+		Candidato candidato1 = new Candidato("00000000X", "José Ignacio", "Rojo Rivero");
+		Candidato candidato2 = new Candidato("00000000Y", "Roberto", "Paterna Ferrón");
+		Candidato candidato3 = new Candidato("00000000Z", "Jorge", "Díez de la Fuente");
 		
-		Votacion votacion = new Votacion("Votaci�n de prueba");
+		Votacion votacion = new Votacion("Votación de prueba");
 		CEE cee = new CEE("Test Center", Base64.encodeBase64String(publicKey.getEncoded()));
 		
 		Escuela escuela = new Escuela("ETSIT");
 		
-		Sector sector1 = new Sector("PDI con vinculaci�n permanente", 0.51f);
-		Sector sector2 = new Sector("PDI sin vinculaci�n permanente", 0.16f);
+		Sector sector1 = new Sector("PDI con vinculación permanente", 0.51f);
+		Sector sector2 = new Sector("PDI sin vinculación permanente", 0.16f);
 		Sector sector3 = new Sector("PAS", 0.09f);
 		Sector sector4 = new Sector("Alumnos", 0.24f);
 

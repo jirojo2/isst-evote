@@ -56,22 +56,22 @@ public class ProcesarVotoServlet extends HttpServlet
 			}
 			else
 			{
-				// Voto rechazado por cualquier razón
+				// Voto rechazado por cualquier razÃ³n
 				// TODO rechazar
 				out.println("rechazado");
 			}
 		}
 		catch (InvalidKeyException | InvalidKeySpecException e)
 		{
-			// Clave del CEE inválida
+			// Clave del CEE invÃ¡lida
 			// TODO rechazar
-			out.println("rechazado por cee inválido o no registado");
+			out.println("rechazado por cee invÃ¡lido o no registado");
 		}
 		catch (SignatureException e)
 		{
-			// Firma del voto inválida
+			// Firma del voto invÃ¡lida
 			// TODO rechazar
-			out.println("rechazado por firma de voto inválida");
+			out.println("rechazado por firma de voto invÃ¡lida");
 		}
 		catch (NoSuchAlgorithmException | IOException e)
 		{
