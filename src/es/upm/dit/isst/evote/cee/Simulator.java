@@ -24,7 +24,6 @@ import org.apache.commons.codec.binary.Base64;
 
 import es.upm.dit.isst.evote.model.CEE;
 import es.upm.dit.isst.evote.model.Candidato;
-import es.upm.dit.isst.evote.model.Escuela;
 import es.upm.dit.isst.evote.model.Sector;
 import es.upm.dit.isst.evote.model.Votacion;
 import es.upm.dit.isst.evote.model.Voto;
@@ -53,12 +52,12 @@ public class Simulator
 	{		
 		private Voto voto;
 		
-		public VotoSimulado(Escuela escuela, Sector sector, Candidato candidato) throws NoSuchAlgorithmException, InvalidKeyException, SignatureException
+		public VotoSimulado(Sector sector, Candidato candidato) throws NoSuchAlgorithmException, InvalidKeyException, SignatureException
 		{
 			long timestamp = new Date().getTime();
 			long nonce = generarNonce();
-			String firma = firma(privateKeyCEE, votacion, cee, escuela, sector, candidato, timestamp, nonce);
-			voto = new Voto(votacion, cee, escuela, sector, candidato, timestamp, nonce, firma);
+			String firma = firma(privateKeyCEE, votacion, cee, sector, candidato, timestamp, nonce);
+			voto = new Voto(votacion, cee, sector, candidato, timestamp, nonce, firma);
 		}
 		
 		public Voto voto()
@@ -72,12 +71,11 @@ public class Simulator
 			return sr.nextLong();
 		}
 		
-		private String firma(PrivateKey privateKey, Votacion votacion, CEE cee, Escuela escuela, Sector sector, Candidato candidato, long timestamp, long nonce) throws NoSuchAlgorithmException, InvalidKeyException, SignatureException
+		private String firma(PrivateKey privateKey, Votacion votacion, CEE cee, Sector sector, Candidato candidato, long timestamp, long nonce) throws NoSuchAlgorithmException, InvalidKeyException, SignatureException
 		{
-			ByteBuffer buffer = ByteBuffer.allocate(56); // total, 56 Byte
+			ByteBuffer buffer = ByteBuffer.allocate(48); // total, 48 Byte
 			buffer.putLong(votacion.id().getId());       // votación en curso
 			buffer.putLong(cee.id().getId());            // cee emisor (1 si solo hay uno)
-			buffer.putLong(escuela.id().getId());        // no se si vamos a mantener esto
 			buffer.putLong(sector.id().getId());         // sector al que pertenece el votante (ponderación)
 			buffer.putLong(candidato.id().getId());      // candidato votado
 			buffer.putLong(timestamp);                   // timestamp con precisión de ms
@@ -102,8 +100,6 @@ public class Simulator
 	
 	private Candidato blanco;
 	
-	private Escuela escuela;
-	
 	private Random rand = new Random();
 	
 	private HashMap<Long, Integer> censo;
@@ -117,7 +113,6 @@ public class Simulator
 		generarVotacion();
 		generarCenso();
 		generarCandidatos();
-		generarEscuelas();
 		generarVotos();
 	}
 	
@@ -225,20 +220,6 @@ public class Simulator
 	}
 	
 	/**
-	 * Genera una escuela de prueba
-	 * 
-	 * <p>Es muy probable que la escuela desaparezca</p>
-	 */
-	private void generarEscuelas()
-	{
-		escuela = new Escuela("ETSIT - Testing");
-
-		EntityManager em = emf.createEntityManager();
-		em.persist(escuela);
-		em.close();
-	}
-	
-	/**
 	 * Genera los votos a partir del censo y de un porcentaje de participación aleatorio
 	 */
 	private void generarVotos()
@@ -302,7 +283,7 @@ public class Simulator
 		VotoSimulado votoSimulado;
 		try
 		{
-			votoSimulado = new VotoSimulado(escuela, sector, candidato);
+			votoSimulado = new VotoSimulado(sector, candidato);
 			
 			// TODO - IMPORTANTE
 			// El voto no tiene que guardarse en la base de datos, sino que tiene que enviarse mediante un POST al Servlet del CRV

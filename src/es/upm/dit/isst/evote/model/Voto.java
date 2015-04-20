@@ -14,6 +14,10 @@ import javax.persistence.ManyToOne;
 import com.google.appengine.api.datastore.Key;
 import com.google.appengine.datanucleus.annotations.Unowned;
 
+/**
+ * Entidad en base de datos independiente del CEE.
+ * El resto de entidades pueden/deben ser comunes.
+ */
 @Entity
 public class Voto implements Serializable
 {
@@ -30,10 +34,6 @@ public class Voto implements Serializable
 	@ManyToOne(fetch=FetchType.EAGER)
 	@Unowned
 	private CEE cee;
-
-	@ManyToOne(fetch=FetchType.EAGER)
-	@Unowned
-	private Escuela escuela;
 
 	@ManyToOne(fetch=FetchType.EAGER)
 	@Unowned
@@ -64,11 +64,10 @@ public class Voto implements Serializable
 	 */
 	private String firma;
 	
-	public Voto(Votacion votacion, CEE cee, Escuela escuela, Sector sector, Candidato candidato, long timestamp, long nonce, String firma)
+	public Voto(Votacion votacion, CEE cee, Sector sector, Candidato candidato, long timestamp, long nonce, String firma)
 	{
 		this.votacion = votacion;
 		this.cee = cee;
-		this.escuela = escuela;
 		this.sector = sector;
 		this.candidato = candidato;
 		
@@ -92,11 +91,6 @@ public class Voto implements Serializable
 	public CEE cee()
 	{
 		return cee;
-	}
-
-	public Escuela escuela()
-	{
-		return escuela;
 	}
 
 	public Sector sector()
@@ -132,15 +126,14 @@ public class Voto implements Serializable
 	}
 	
 	/**
-	 * Incluye los campos id_votacion, id_cee, id_escuela, id_mesa, id_candidato, timestamp (CEE), nonce (CEE)
+	 * Incluye los campos id_votacion, id_cee, id_mesa, id_candidato, timestamp (CEE), nonce (CEE)
 	 * @return ByteBuffer preparado para comprobar la firma del voto con la clave pública del CEE
 	 */
 	public ByteBuffer datosParaValidarFirma()
 	{
-		ByteBuffer buffer = ByteBuffer.allocate(56);
+		ByteBuffer buffer = ByteBuffer.allocate(48);
 		buffer.putLong(votacion.id().getId());
 		buffer.putLong(cee.id().getId());
-		buffer.putLong(escuela.id().getId());
 		buffer.putLong(sector.id().getId());
 		buffer.putLong(candidato.id().getId());
 		buffer.putLong(timestampEmitido);

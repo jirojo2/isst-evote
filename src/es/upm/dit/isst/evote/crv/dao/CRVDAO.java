@@ -1,6 +1,5 @@
 package es.upm.dit.isst.evote.crv.dao;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import javax.persistence.EntityManager;
@@ -8,7 +7,6 @@ import javax.persistence.Query;
 
 import es.upm.dit.isst.evote.model.CEE;
 import es.upm.dit.isst.evote.model.Candidato;
-import es.upm.dit.isst.evote.model.Escuela;
 import es.upm.dit.isst.evote.model.Sector;
 import es.upm.dit.isst.evote.model.Votacion;
 import es.upm.dit.isst.evote.model.Voto;
@@ -31,12 +29,6 @@ public class CRVDAO
 	{
 		EntityManager em = EMFService.get().createEntityManager();
 		return em.find(CEE.class, id);
-	}
-	
-	public Escuela findEscuelaById(long id)
-	{
-		EntityManager em = EMFService.get().createEntityManager();
-		return em.find(Escuela.class, id);
 	}
 	
 	public Sector findSectorById(long id)
@@ -78,36 +70,6 @@ public class CRVDAO
 		q.setParameter("votacion", votacion.id());
 		return q.getResultList();
 	}
-	
-	/**
-	 * @deprecated no usar
-	 * @param votacion
-	 * @return
-	 */
-	public List<Escuela> escuelasVotacion(Votacion votacion)
-	{
-		List<Voto> votos = votosVotacion(votacion);
-		List<Escuela> escuelas = new ArrayList<Escuela>();
-		for (Voto voto: votos)
-			if (!escuelas.contains(voto.escuela()))
-				escuelas.add(voto.escuela());
-		return escuelas;
-	}
-	
-	/**
-	 * @deprecated no usar
-	 * @param votacion
-	 * @return
-	 */
-	public List<Candidato> candidatosVotacionOld(Votacion votacion)
-	{
-		List<Voto> votos = votosVotacion(votacion);
-		List<Candidato> candidatos = new ArrayList<Candidato>();
-		for (Voto voto: votos)
-			if (!candidatos.contains(voto.candidato()))
-				candidatos.add(voto.candidato());
-		return candidatos;
-	}
 
 	@SuppressWarnings("unchecked")
 	public List<Candidato> candidatosVotacion(Votacion votacion)
@@ -125,24 +87,6 @@ public class CRVDAO
 		Query q = em.createQuery("select s from Sector s where votacion = :votacion");
 		q.setParameter("votacion", votacion.id());
 		return q.getResultList();
-	}
-	
-	/**
-	 * @deprecated no usar
-	 * @param candidato
-	 * @param votacion
-	 * @return
-	 */
-	public int votosCandidatoVotacion(Candidato candidato, Votacion votacion)
-	{
-		EntityManager em = EMFService.get().createEntityManager();
-		Query q = em.createQuery("select v from Voto v where votacion = :votacion and candidato = :candidato");
-		q.setParameter("votacion", votacion.id());
-		q.setParameter("candidato", candidato.id());
-		
-		// TODO: Votos por sectores, pero no mezclar los números => NO DAR DECIMALES 
-		
-		return q.getResultList().size();
 	}
 	
 	/**
@@ -212,23 +156,6 @@ public class CRVDAO
 		return votosCandidatoSector(votacion, blanco(), sector);
 	}
 	
-	/**
-	 * @deprecated no desglosar por escuelas
-	 * @param candidato
-	 * @param escuela
-	 * @param votacion
-	 * @return
-	 */
-	public int votosCandidatoEscuelaVotacion(Candidato candidato, Escuela escuela, Votacion votacion)
-	{
-		EntityManager em = EMFService.get().createEntityManager();
-		Query q = em.createQuery("select v from Voto v where votacion = :votacion and escuela = :escuela and candidato = :candidato");
-		q.setParameter("votacion", votacion.id());
-		q.setParameter("escuela", escuela.id());
-		q.setParameter("candidato", candidato.id());
-		return q.getResultList().size();
-	}
-	
 	public synchronized void registrar(Votacion votacion)
 	{
 		EntityManager em = EMFService.get().createEntityManager();
@@ -240,13 +167,6 @@ public class CRVDAO
 	{
 		EntityManager em = EMFService.get().createEntityManager();
 		em.persist(cee);
-		em.close();
-	}
-	
-	public synchronized void registrar(Escuela escuela)
-	{
-		EntityManager em = EMFService.get().createEntityManager();
-		em.persist(escuela);
 		em.close();
 	}
 	
