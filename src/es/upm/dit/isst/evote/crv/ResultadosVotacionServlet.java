@@ -9,7 +9,7 @@ import javax.servlet.http.HttpServletResponse;
 import com.google.gson.Gson;
 
 import es.upm.dit.isst.evote.crv.dao.CRVDAO;
-import es.upm.dit.isst.evote.crv.json.ResultadosVotacionPorEscuelas;
+import es.upm.dit.isst.evote.crv.json.Resultados;
 import es.upm.dit.isst.evote.model.Votacion;
 
 public class ResultadosVotacionServlet extends HttpServlet
@@ -31,8 +31,7 @@ public class ResultadosVotacionServlet extends HttpServlet
 		}
 		
 		Votacion votacion = CRVDAO.instance.findVotacionById(id_votacion);
-		ResultadosVotacionPorEscuelas resultados = CRV.instance.resultadosVotacionPorEscuelas(votacion);
-		//ResultadosVotacion resultados = CRV.instance.resultadosVotacion(votacion);
+		Resultados resultados = CRV.instance.resultados(votacion);
 		
 		Gson gson = new Gson();
 		

@@ -14,11 +14,11 @@ import java.util.List;
 import org.apache.commons.codec.binary.Base64;
 
 import es.upm.dit.isst.evote.crv.dao.CRVDAO;
-import es.upm.dit.isst.evote.crv.json.ResultadosVotacion;
-import es.upm.dit.isst.evote.crv.json.ResultadosVotacionPorEscuelas;
+import es.upm.dit.isst.evote.crv.json.Resultados;
+import es.upm.dit.isst.evote.crv.json.ResultadosCandidato;
 import es.upm.dit.isst.evote.model.CEE;
 import es.upm.dit.isst.evote.model.Candidato;
-import es.upm.dit.isst.evote.model.Escuela;
+import es.upm.dit.isst.evote.model.Sector;
 import es.upm.dit.isst.evote.model.Votacion;
 import es.upm.dit.isst.evote.model.Voto;
 
@@ -68,35 +68,38 @@ public class CRV
 		return signature.verify(decoded);
 	}
 	
-	public ResultadosVotacion resultadosVotacion(Votacion votacion)
+	public Resultados resultados(Votacion votacion)
 	{
-		ResultadosVotacion resultados = new ResultadosVotacion();
+		Resultados resultados = new Resultados();
 		
 		List<Candidato> candidatos = CRVDAO.instance.candidatosVotacion(votacion);
-		for (Candidato candidato : candidatos)
+		List<Sector> sectores = CRVDAO.instance.sectoresVotacion(votacion);
+		
+		for (Sector sector : sectores)
 		{
-			int votos = CRVDAO.instance.votosCandidatoVotacion(candidato, votacion);
-			resultados.votosDelCandidato(candidato, votos);
+			int votosBlanco = CRVDAO.instance.votosBlancoSector(votacion, sector);
+			int totalVotos = CRVDAO.instance.votosSector(votacion, sector);
+			resultados.getVotosBlanco().put(sector, votosBlanco);
+			resultados.getVotosEmitidos().put(sector, totalVotos);
 		}
 		
-		return resultados;
-	}
-	
-	public ResultadosVotacionPorEscuelas resultadosVotacionPorEscuelas(Votacion votacion)
-	{
-		ResultadosVotacion globales = this.resultadosVotacion(votacion);
-		ResultadosVotacionPorEscuelas resultados = new ResultadosVotacionPorEscuelas(globales);
-		
-		List<Candidato> candidatos = CRVDAO.instance.candidatosVotacion(votacion);
-		List<Escuela> escuelas = CRVDAO.instance.escuelasVotacion(votacion);
-		for (Escuela escuela : escuelas) {
-			ResultadosVotacion local = new ResultadosVotacion();
-			for (Candidato candidato : candidatos)
+		for (Candidato candidato : candidatos)
+		{
+			ResultadosCandidato rc = new ResultadosCandidato();
+			rc.setCandidato(candidato);
+			
+			double totalPonderado = 0.0;
+			
+			for (Sector sector : sectores)
 			{
-				int votos = CRVDAO.instance.votosCandidatoEscuelaVotacion(candidato, escuela, votacion);				
-				local.votosDelCandidato(candidato, votos);
+				int votos = CRVDAO.instance.votosCandidatoSector(votacion, candidato, sector);
+				int votosSectorValidos = resultados.getVotosEmitidos().get(sector) - resultados.getVotosBlanco().get(sector);
+				totalPonderado += votos * sector.ponderacion() / votosSectorValidos;
+				rc.getVotos().put(sector, votos);
 			}
-			resultados.escuela(escuela, local);
+			
+			rc.setTotalPonderado(totalPonderado);
+			resultados.getCandidatos().add(rc);
 		}
 		
 		return resultados;
