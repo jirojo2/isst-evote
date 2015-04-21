@@ -11,6 +11,9 @@ import es.upm.dit.isst.evote.model.Sector;
 import es.upm.dit.isst.evote.model.Votacion;
 import es.upm.dit.isst.evote.model.Voto;
 
+/**
+ * DAO para CRV
+ */
 public class CRVDAO
 {
 	public static CRVDAO instance = new CRVDAO();
@@ -55,20 +58,6 @@ public class CRVDAO
 			return votacion.id().getId();
 		}
 		return 0L;
-	}
-
-	/**
-	 * @deprecated no usar
-	 * @param votacion
-	 * @return
-	 */
-	@SuppressWarnings("unchecked")
-	public List<Voto> votosVotacion(Votacion votacion)
-	{
-		EntityManager em = EMFService.get().createEntityManager();
-		Query q = em.createQuery("select v from Voto v where votacion = :votacion");
-		q.setParameter("votacion", votacion.id());
-		return q.getResultList();
 	}
 
 	@SuppressWarnings("unchecked")

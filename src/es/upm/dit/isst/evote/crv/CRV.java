@@ -29,8 +29,6 @@ import es.upm.dit.isst.evote.model.Voto;
  * por el CEE, que ya han sido verificados con el centro,
  * y preservan la confidencialidad del votante.
  * 
- * @author Josi
- *
  */
 public class CRV
 {
