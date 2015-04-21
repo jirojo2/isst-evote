@@ -25,6 +25,11 @@ public class TestServlet extends HttpServlet
 		datos.put("test", "alpha");
 		datos.put("resultado", "ok");
 		
+		Simulator sim = new Simulator();
+		
+		sim.borrarDatos();
+		sim.run();
+		
 		try
 		{
 			res.getWriter().println(gson.toJson(datos));

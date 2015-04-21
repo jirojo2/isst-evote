@@ -165,6 +165,7 @@ public class Simulator
 	private void generarCenso()
 	{
 		censo = new HashMap<Long, Integer>();
+		sectores = new LinkedList<Sector>();
 		
 		HashMap<String, Integer> censoN = new HashMap<String, Integer>();
 		censoN.put("grupoA", 1820);
@@ -189,8 +190,10 @@ public class Simulator
 		{
 			Sector sector = new Sector(votacion, censoNombres.get(n), censoPonderaciones.get(n));
 			sectores.add(sector);
-			censo.put(sector.id().getId(), censoN.get(n));
+			em.getTransaction().begin();
 			em.persist(sector);
+			em.getTransaction().commit();
+			censo.put(sector.id().getId(), censoN.get(n));
 		}
 		em.close();
 	}
@@ -237,10 +240,14 @@ public class Simulator
 			double participacion = 0.3 + rand.nextDouble()/2;
 			
 			int votosEsperados = (int) Math.round(entry.getValue() * participacion);
+			System.out.format("  %d votos esperados para el sector %s...", votosEsperados, entry.getKey());
+			
 			for (int i = 0; i < votosEsperados; i++)
 			{				
 				generarVoto(entry.getKey());
 			}
+			
+			System.out.println(" ok!");
 		}
 	}
 	
@@ -306,12 +313,11 @@ public class Simulator
 		EntityManager em = emf.createEntityManager();
 		
 		// Borrar todas las entradas de las tablas que trabajamos
-		em.createQuery("DELETE FROM candidato").executeUpdate();
-		em.createQuery("DELETE FROM cee").executeUpdate();
-		em.createQuery("DELETE FROM escuela").executeUpdate();
-		em.createQuery("DELETE FROM sector").executeUpdate();
-		em.createQuery("DELETE FROM votacion").executeUpdate();
-		em.createQuery("DELETE FROM voto").executeUpdate();
+		em.createQuery("DELETE FROM Candidato c").executeUpdate();
+		em.createQuery("DELETE FROM CEE c").executeUpdate();
+		em.createQuery("DELETE FROM Sector s").executeUpdate();
+		em.createQuery("DELETE FROM Votacion v").executeUpdate();
+		em.createQuery("DELETE FROM Voto v").executeUpdate();
 	}
 
 	/**
