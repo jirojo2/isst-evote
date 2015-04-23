@@ -1,6 +1,7 @@
 package es.upm.dit.isst.evote.cee;
 
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
@@ -13,27 +14,27 @@ import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
+import java.security.PublicKey;
 import java.security.SecureRandom;
 import java.security.Signature;
 import java.security.SignatureException;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.Iterator;
-import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Random;
 
-import javax.persistence.EntityManager;
-import javax.persistence.EntityManagerFactory;
-import javax.persistence.Persistence;
-
 import org.apache.commons.codec.binary.Base64;
 
-import es.upm.dit.isst.evote.model.CEE;
-import es.upm.dit.isst.evote.model.Candidato;
-import es.upm.dit.isst.evote.model.Sector;
-import es.upm.dit.isst.evote.model.Votacion;
-import es.upm.dit.isst.evote.model.Voto;
+import com.google.gson.Gson;
+
+import es.upm.dit.isst.evote.crv.json.SyncVotacion;
+import es.upm.dit.isst.evote.cee.model.CEE;
+import es.upm.dit.isst.evote.cee.model.Candidato;
+import es.upm.dit.isst.evote.cee.model.Sector;
+import es.upm.dit.isst.evote.cee.model.Votacion;
+import es.upm.dit.isst.evote.cee.model.Voto;
 
 /**
  * Simulador del componente CEE
@@ -81,10 +82,10 @@ public class Simulator
 		private String firma(PrivateKey privateKey, Votacion votacion, CEE cee, Sector sector, Candidato candidato, long timestamp, long nonce) throws NoSuchAlgorithmException, InvalidKeyException, SignatureException
 		{
 			ByteBuffer buffer = ByteBuffer.allocate(48); // total, 48 Byte
-			buffer.putLong(votacion.id().getId());       // votación en curso
-			buffer.putLong(cee.id().getId());            // cee emisor (1 si solo hay uno)
-			buffer.putLong(sector.id().getId());         // sector al que pertenece el votante (ponderación)
-			buffer.putLong(candidato.id().getId());      // candidato votado
+			buffer.putLong(votacion.id());       		 // votación en curso
+			buffer.putLong(cee.id());            		 // cee emisor (1 si solo hay uno)
+			buffer.putLong(sector.id());         		 // sector al que pertenece el votante (ponderación)
+			buffer.putLong(candidato.id());      		 // candidato votado
 			buffer.putLong(timestamp);                   // timestamp con precisión de ms
 			buffer.putLong(nonce);                       // nonce aleatorio que usamos para confirmar y evitar replays, 64 bit
 			
@@ -95,21 +96,20 @@ public class Simulator
 		}
 	}
 	
-	private static final EntityManagerFactory emf = Persistence.createEntityManagerFactory("transactions-optional");
-	
 	private Votacion votacion;
 	private CEE cee;
 	
 	PrivateKey privateKeyCEE;
+	PublicKey publicKeyCEE;
 	
-	private LinkedList<Candidato> candidatos; 
-	private LinkedList<Sector> sectores; 
+	private List<Candidato> candidatos; 
+	private List<Sector> sectores; 
 	
 	private Candidato blanco;
 	
 	private Random rand = new Random();
 	
-	private HashMap<Long, Integer> censo;
+	private Map<Long, Integer> censo;
 	
 	private int totalVotosEmitidos = 0;
 	private int port;
@@ -140,14 +140,12 @@ public class Simulator
 	public void run() 
 	{
 		generarCEE();
-		generarVotacion();
-		generarCenso();
-		generarCandidatos();
+		syncData();
 		generarVotos();
 	}
 	
 	/**
-	 * Genera un CEE de prueba
+	 * Genera la pareja de claves para un CEE de prueba
 	 */
 	private void generarCEE()
 	{
@@ -165,91 +163,68 @@ public class Simulator
 		keyPairGenerator.initialize(1024); // Key Size -> 4096 bit en producción 
 		KeyPair keyPair = keyPairGenerator.generateKeyPair();
 
-		cee = new CEE("Test Center", Base64.encodeBase64String(keyPair.getPublic().getEncoded()));
+		publicKeyCEE = keyPair.getPublic();
 		privateKeyCEE = keyPair.getPrivate();
-
-		EntityManager em = emf.createEntityManager();	
-		em.persist(cee);
-		em.close();
 	}
 	
 	/**
-	 * Genera una votación de prueba
+	 * Inicializa una nueva votación de prueba en el CRV
+	 * Devuelve un JSON con los IDs relevantes para el simulador
+	 * @return
 	 */
-	private void generarVotacion()
+	private boolean syncData()
 	{
-		votacion = new Votacion("Votación de prueba");
+		try 
+	    {
+			Gson gson = new Gson();
+			String encodedData = "key=" + URLEncoder.encode(Base64.encodeBase64String(publicKeyCEE.getEncoded()), "UTF-8");
+			
+	        URL url = new URL("http://" + hostname + ":" + port + "/sync");
+	        HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+	        connection.setDoOutput(true);
+	        connection.setRequestMethod("POST");
+	        connection.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
+	        connection.setRequestProperty("Content-Length", String.valueOf(encodedData.length()));
 
-		EntityManager em = emf.createEntityManager();	
-		em.persist(votacion);
-		em.close();		
-	}
-	
-	/**
-	 * Genera: Censo y sectores
-	 * grupoA	Profesores doctores con vinculación permanente
-     * grupoB	Resto del profesorado y personal investigador
-     * grupoC	Estudiantes
-     * grupoD	Personal de administración y servicios
-	 */
-	private void generarCenso()
-	{
-		censo = new HashMap<Long, Integer>();
-		sectores = new LinkedList<Sector>();
-		
-		HashMap<String, Integer> censoN = new HashMap<String, Integer>();
-		censoN.put("grupoA", 1820);
-		censoN.put("grupoB", 2297);
-		censoN.put("grupoC", 39450);
-		censoN.put("grupoD", 2569);
+	        OutputStreamWriter writer = new OutputStreamWriter(connection.getOutputStream());
+	        writer.write(encodedData);
+	        writer.close();
 
-		HashMap<String, Float> censoPonderaciones = new HashMap<String, Float>();
-		censoPonderaciones.put("grupoA", 0.51f);
-		censoPonderaciones.put("grupoB", 0.16f);
-		censoPonderaciones.put("grupoC", 0.24f);
-		censoPonderaciones.put("grupoD", 0.09f);
-		
-		HashMap<String, String> censoNombres = new HashMap<String, String>();
-		censoNombres.put("grupoA", "Profesores doctores con vinculación permanente");
-		censoNombres.put("grupoB", "Resto del profesorado y personal investigador");
-		censoNombres.put("grupoC", "Estudiantes");
-		censoNombres.put("grupoD", "Personal de administración y servicios");
-
-		EntityManager em = emf.createEntityManager();
-		for(String n : new String[]{"grupoA", "grupoB", "grupoC", "grupoD"})
+	        if (connection.getResponseCode() == HttpURLConnection.HTTP_OK) 
+	        {
+	            // OK
+	        	SyncVotacion sv = gson.fromJson(new InputStreamReader(connection.getInputStream()), SyncVotacion.class);
+	        	
+	        	cee = sv.getCee();
+	        	votacion = sv.getVotacion();
+	        	censo = sv.getCenso();
+	        	sectores = sv.getSectores();
+	        	blanco = sv.getBlanco();
+	        	candidatos = sv.getCandidatos();
+	        	
+	        	return true;
+	        } 
+	        else 
+	        {
+	            // Server returned HTTP error code.
+	        	return false;
+	        }
+	    } 
+	    catch (MalformedURLException e) 
+	    {
+			e.printStackTrace();
+			return false;
+	    } 
+	    catch (UnsupportedEncodingException e)
 		{
-			Sector sector = new Sector(votacion, censoNombres.get(n), censoPonderaciones.get(n));
-			sectores.add(sector);
-			em.getTransaction().begin();
-			em.persist(sector);
-			em.getTransaction().commit();
-			censo.put(sector.id().getId(), censoN.get(n));
+			e.printStackTrace();
+			return false;
 		}
-		em.close();
-	}
-	
-	/**
-	 * Genera los candidatos
-	 */
-	private void generarCandidatos()
-	{
-		String[] nombresCandidatos = { "Guillermo Cisneros", "Carlos Conde" };
-		candidatos = new LinkedList<Candidato>(); 
-		
-		EntityManager em = emf.createEntityManager();
-		for (String nombreCandidato : nombresCandidatos)
-		{
-			String[] n = nombreCandidato.split(" ");
-			Candidato candidato = new Candidato(votacion, "test", n[0], n[1]);
-			candidatos.add(candidato);
-			em.persist(candidato);
-		}
-		
-		// Candidato especial: blanco
-		blanco = new Candidato(votacion, "blanco", "", "blanco");
-		em.persist(blanco);
-		
-		em.close();
+	    catch (IOException e) 
+	    {
+			e.printStackTrace();
+			return false;
+	    }
 	}
 	
 	/**
@@ -270,7 +245,7 @@ public class Simulator
 			double participacion = 0.3 + rand.nextDouble()/2;
 			
 			// TEMP: bajamos la participación para la demo:
-			participacion = participacion / 10;
+			participacion = participacion / 20;
 			
 			int votosEsperados = (int) Math.round(entry.getValue() * participacion);
 			System.out.format("%d votos esperados para el sector %s", votosEsperados, entry.getKey());
@@ -297,7 +272,7 @@ public class Simulator
 		Sector sector = null;
 		for (Sector s : sectores)
 		{
-			if (s.id().getId() == sectorId)
+			if (s.id() == sectorId)
 			{
 				sector = s;
 				break;
@@ -344,10 +319,10 @@ public class Simulator
 	    try 
 	    {
 	    	String encodedData = "";
-			encodedData = "id_votacion=" + URLEncoder.encode(String.valueOf(voto.votacion().id().getId()), "UTF-8");
-			encodedData += "&id_cee=" + URLEncoder.encode(String.valueOf(voto.cee().id().getId()), "UTF-8");
-			encodedData += "&id_sector=" + URLEncoder.encode(String.valueOf(voto.sector().id().getId()), "UTF-8");
-			encodedData += "&id_candidato=" + URLEncoder.encode(String.valueOf(voto.candidato().id().getId()), "UTF-8");
+			encodedData = "id_votacion=" + URLEncoder.encode(String.valueOf(voto.votacion().id()), "UTF-8");
+			encodedData += "&id_cee=" + URLEncoder.encode(String.valueOf(voto.cee().id()), "UTF-8");
+			encodedData += "&id_sector=" + URLEncoder.encode(String.valueOf(voto.sector().id()), "UTF-8");
+			encodedData += "&id_candidato=" + URLEncoder.encode(String.valueOf(voto.candidato().id()), "UTF-8");
 			encodedData += "&timestamp=" + URLEncoder.encode(String.valueOf(voto.timestampEmitido()), "UTF-8");
 			encodedData += "&nonce=" + URLEncoder.encode(String.valueOf(voto.nonce()), "UTF-8");
 			encodedData += "&firma=" + URLEncoder.encode(voto.firma(), "UTF-8");
@@ -390,24 +365,6 @@ public class Simulator
 			return false;
 	    }
 	}
-	
-	/**
-	 * Borra todos los datos de la base de datos
-	 */
-	public void borrarDatos()
-	{
-		EntityManager em = emf.createEntityManager();
-		
-		// Borrar todas las entradas de las tablas que trabajamos
-		em.createQuery("DELETE FROM Candidato c").executeUpdate();
-		em.createQuery("DELETE FROM CEE c").executeUpdate();
-		em.createQuery("DELETE FROM Sector s").executeUpdate();
-		em.createQuery("DELETE FROM Votacion v").executeUpdate();
-		em.createQuery("DELETE FROM Voto v").executeUpdate();
-		
-		em.close();
-	}
-
 	/**
 	 * Ejecuta el simulador, borrando previamente los datos que pueda haber en la base de datos.
 	 * @param args
@@ -415,8 +372,6 @@ public class Simulator
 	public static void main(String[] args) 
 	{
 		Simulator sim = new Simulator();
-		
-		sim.borrarDatos();
 		sim.run();
 	}
 

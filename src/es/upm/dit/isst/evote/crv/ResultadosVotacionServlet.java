@@ -17,6 +17,7 @@ import es.upm.dit.isst.evote.model.Votacion;
 public class ResultadosVotacionServlet extends HttpServlet
 {
 	private static final long serialVersionUID = -3909947981713813483L;
+	private static boolean enableCache = true;
 
 	@Override
 	public void doGet(HttpServletRequest req, HttpServletResponse res)
@@ -40,7 +41,7 @@ public class ResultadosVotacionServlet extends HttpServlet
 		
 		try
 		{
-			if (votacion.tieneCacheResultado())
+			if (enableCache && votacion.tieneCacheResultado())
 			{
 				res.getWriter().println(votacion.cacheResultadoJSON());	
 				System.out.println("Mostrando resultados desde cache de votación");

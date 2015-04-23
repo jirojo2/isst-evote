@@ -60,7 +60,7 @@ public class Voto implements Serializable
 	
 	/**
 	 * Base64 encoded SHA512withRSA, firma emitida por el CEE emisor del voto
-	 * Incluye los campos id_votacion, id_cee, id_escuela, id_sector, id_candidato, timestamp (CEE), nonce (CEE)
+	 * Incluye los campos id_votacion, id_cee, id_sector, id_candidato, timestamp (CEE), nonce (CEE)
 	 */
 	private String firma;
 	
@@ -131,7 +131,7 @@ public class Voto implements Serializable
 	}
 	
 	/**
-	 * Incluye los campos id_votacion, id_cee, id_mesa, id_candidato, timestamp (CEE), nonce (CEE)
+	 * Incluye los campos id_votacion, id_cee, id_candidato, timestamp (CEE), nonce (CEE)
 	 * @return ByteBuffer preparado para comprobar la firma del voto con la clave pública del CEE
 	 */
 	public byte[] datosParaValidarFirma()

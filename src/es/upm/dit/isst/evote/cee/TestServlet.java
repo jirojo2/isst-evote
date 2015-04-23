@@ -34,9 +34,8 @@ public class TestServlet extends HttpServlet
 		{
 			sim.setHostname("isst-crv.appspot.com");
 			sim.setPort(80);
-		}		
+		}
 		
-		sim.borrarDatos();
 		sim.run();
 		
 		long toc = new Date().getTime();

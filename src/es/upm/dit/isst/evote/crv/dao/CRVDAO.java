@@ -99,9 +99,9 @@ public class CRVDAO
 	public int votos(Votacion votacion)
 	{
 		EntityManager em = EMFService.get().createEntityManager();
-		Query q = em.createQuery("select v from Voto v where votacion = :votacion");
+		Query q = em.createQuery("select count(v.id) from Voto v where votacion = :votacion");
 		q.setParameter("votacion", votacion.id());
-		int r = q.getResultList().size();
+		int r = (int) (long) q.getSingleResult();
 		em.close();
 		return r;
 	}
@@ -115,10 +115,10 @@ public class CRVDAO
 	public int votosSector(Votacion votacion, Sector sector)
 	{
 		EntityManager em = EMFService.get().createEntityManager();
-		Query q = em.createQuery("select v from Voto v where votacion = :votacion and sector = :sector");
+		Query q = em.createQuery("select count(v.id) from Voto v where votacion = :votacion and sector = :sector");
 		q.setParameter("votacion", votacion.id());
 		q.setParameter("sector", sector.id());
-		int r = q.getResultList().size();
+		int r = (int) (long) q.getSingleResult();
 		em.close();
 		return r;
 	}
@@ -133,11 +133,11 @@ public class CRVDAO
 	public int votosCandidatoSector(Votacion votacion, Candidato candidato, Sector sector)
 	{
 		EntityManager em = EMFService.get().createEntityManager();
-		Query q = em.createQuery("select v from Voto v where votacion = :votacion and candidato = :candidato and sector = :sector");
+		Query q = em.createQuery("select count(v.id) from Voto v where votacion = :votacion and candidato = :candidato and sector = :sector");
 		q.setParameter("votacion", votacion.id());
 		q.setParameter("candidato", candidato.id());
 		q.setParameter("sector", sector.id());
-		int r = q.getResultList().size();
+		int r = (int) (long) q.getSingleResult();
 		em.close();
 		return r;
 	}
