@@ -1,5 +1,12 @@
 package es.upm.dit.isst.evote.cee;
 
+import java.io.IOException;
+import java.io.OutputStreamWriter;
+import java.io.UnsupportedEncodingException;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.net.URLEncoder;
 import java.nio.ByteBuffer;
 import java.security.InvalidKeyException;
 import java.security.KeyPair;
@@ -67,7 +74,7 @@ public class Simulator
 		
 		private Long generarNonce() throws NoSuchAlgorithmException
 		{
-			SecureRandom sr = SecureRandom.getInstance("NativePRNG");
+			SecureRandom sr = SecureRandom.getInstance("SHA1PRNG");
 			return sr.nextLong();
 		}
 		
@@ -83,7 +90,7 @@ public class Simulator
 			
 			Signature signature = Signature.getInstance("SHA512withRSA");
 			signature.initSign(privateKey);
-			signature.update(buffer);
+			signature.update(buffer.array());
 			return Base64.encodeBase64String(signature.sign()); // la firma se codifica en base64
 		}
 	}
@@ -103,6 +110,29 @@ public class Simulator
 	private Random rand = new Random();
 	
 	private HashMap<Long, Integer> censo;
+	
+	private int totalVotosEmitidos = 0;
+	private int port;
+	private String hostname;
+	
+	public void setHostname(String value)
+	{
+		hostname = value;
+	}
+	
+	public void setPort(int value)
+	{
+		port = value;
+	}
+	
+	/**
+	 * Devuelve el total de votos emitidos registrados por el simulador
+	 * @return total de votos emitidos por el simulador
+	 */
+	public int getTotalVotosEmitidos()
+	{
+		return totalVotosEmitidos;
+	}
 	
 	/**
 	 * Ejecuta el simulador
@@ -203,20 +233,20 @@ public class Simulator
 	 */
 	private void generarCandidatos()
 	{
-		String[] nombresCandidatos = { "Guillermo Cisneros", "Carlos Conde", "Alfonso Maldonado" };
+		String[] nombresCandidatos = { "Guillermo Cisneros", "Carlos Conde" };
 		candidatos = new LinkedList<Candidato>(); 
 		
 		EntityManager em = emf.createEntityManager();
 		for (String nombreCandidato : nombresCandidatos)
 		{
 			String[] n = nombreCandidato.split(" ");
-			Candidato candidato = new Candidato("test", n[0], n[1]);
+			Candidato candidato = new Candidato(votacion, "test", n[0], n[1]);
 			candidatos.add(candidato);
 			em.persist(candidato);
 		}
 		
 		// Candidato especial: blanco
-		blanco = new Candidato("blanco", "", "blanco");
+		blanco = new Candidato(votacion, "blanco", "", "blanco");
 		em.persist(blanco);
 		
 		em.close();
@@ -239,15 +269,21 @@ public class Simulator
 			// participación: 0.3 - 0.8
 			double participacion = 0.3 + rand.nextDouble()/2;
 			
+			// TEMP: bajamos la participación para la demo:
+			participacion = participacion / 10;
+			
 			int votosEsperados = (int) Math.round(entry.getValue() * participacion);
-			System.out.format("  %d votos esperados para el sector %s...", votosEsperados, entry.getKey());
+			System.out.format("%d votos esperados para el sector %s", votosEsperados, entry.getKey());
+			System.out.println();
 			
 			for (int i = 0; i < votosEsperados; i++)
 			{				
 				generarVoto(entry.getKey());
 			}
 			
-			System.out.println(" ok!");
+			totalVotosEmitidos += votosEsperados;
+			System.out.format("%d votos emitidos!", votosEsperados);
+			System.out.println();
 		}
 	}
 	
@@ -258,8 +294,6 @@ public class Simulator
 	 */
 	private void generarVoto(Long sectorId)
 	{
-		// TODO: generar un voto
-
 		Sector sector = null;
 		for (Sector s : sectores)
 		{
@@ -276,7 +310,7 @@ public class Simulator
 		
 		for (int i = 0; i < candidatos.size(); i++)
 		{
-			if (magic < pBlanco + (100-pBlanco)/candidatos.size()*(i+1))
+			if (magic > pBlanco && magic < pBlanco + (100-pBlanco)/candidatos.size()*(i+1))
 			{
 				candidato = candidatos.get(i);
 				break;
@@ -290,19 +324,71 @@ public class Simulator
 		VotoSimulado votoSimulado;
 		try
 		{
-			votoSimulado = new VotoSimulado(sector, candidato);
-			
-			// TODO - IMPORTANTE
-			// El voto no tiene que guardarse en la base de datos, sino que tiene que enviarse mediante un POST al Servlet del CRV
-			EntityManager em = emf.createEntityManager();
-			em.persist(votoSimulado.voto());
-			em.close();	
+			votoSimulado = new VotoSimulado(sector, candidato);			
+			enviarVoto(votoSimulado.voto());
 		} 
 		catch (InvalidKeyException | NoSuchAlgorithmException | SignatureException e)
 		{
 			// Voto fallido! Problemas cryptográficos
 			e.printStackTrace();
 		}	
+	}
+	
+	/**
+	 * Realiza una petición HTTP POST al CRV con el voto emitido
+	 * @param voto emitido por el CEE y firmado
+	 * @return si la operación tiene éxito
+	 */
+	public boolean enviarVoto(Voto voto)
+	{
+	    try 
+	    {
+	    	String encodedData = "";
+			encodedData = "id_votacion=" + URLEncoder.encode(String.valueOf(voto.votacion().id().getId()), "UTF-8");
+			encodedData += "&id_cee=" + URLEncoder.encode(String.valueOf(voto.cee().id().getId()), "UTF-8");
+			encodedData += "&id_sector=" + URLEncoder.encode(String.valueOf(voto.sector().id().getId()), "UTF-8");
+			encodedData += "&id_candidato=" + URLEncoder.encode(String.valueOf(voto.candidato().id().getId()), "UTF-8");
+			encodedData += "&timestamp=" + URLEncoder.encode(String.valueOf(voto.timestampEmitido()), "UTF-8");
+			encodedData += "&nonce=" + URLEncoder.encode(String.valueOf(voto.nonce()), "UTF-8");
+			encodedData += "&firma=" + URLEncoder.encode(voto.firma(), "UTF-8");
+			
+	        URL url = new URL("http://" + hostname + ":" + port + "/voto");
+	        HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+	        connection.setDoOutput(true);
+	        connection.setRequestMethod("POST");
+	        connection.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
+	        connection.setRequestProperty("Content-Length", String.valueOf(encodedData.length()));
+
+	        OutputStreamWriter writer = new OutputStreamWriter(connection.getOutputStream());
+	        writer.write(encodedData);
+	        writer.close();
+
+	        if (connection.getResponseCode() == HttpURLConnection.HTTP_OK) 
+	        {
+	            // OK
+	        	return true;
+	        } 
+	        else 
+	        {
+	            // Server returned HTTP error code.
+	        	return false;
+	        }
+	    } 
+	    catch (MalformedURLException e) 
+	    {
+			e.printStackTrace();
+			return false;
+	    } 
+	    catch (UnsupportedEncodingException e)
+		{
+			e.printStackTrace();
+			return false;
+		}
+	    catch (IOException e) 
+	    {
+			e.printStackTrace();
+			return false;
+	    }
 	}
 	
 	/**
@@ -318,6 +404,8 @@ public class Simulator
 		em.createQuery("DELETE FROM Sector s").executeUpdate();
 		em.createQuery("DELETE FROM Votacion v").executeUpdate();
 		em.createQuery("DELETE FROM Voto v").executeUpdate();
+		
+		em.close();
 	}
 
 	/**

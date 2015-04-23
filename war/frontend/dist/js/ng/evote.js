@@ -6,12 +6,10 @@ angular
 	.controller('ResultadosCtrl', ['$scope', '$http', function($scope, $http) {
 	
 		$scope.resultados = null;
-		$scope.escuelas = [];
 		$scope.candidatos = [];
+		$scope.sectores = [];
 		
 		$scope.grafico = null;
-		$scope.activo = 'Globales';		
-		$scope.r = null;
 		
 		window.scope = $scope;
 		
@@ -19,34 +17,14 @@ angular
 			.get('/dist/js/ng/resultados.json')
 			.success(function(data) {
 				$scope.resultados = data;
-				$scope.totalVotos = 0;
-				$scope.escuelas = [];
-				$scope.candidatos = [];
-				
-				$scope.ganador = data.global.ganador;
-				$scope.totalVotos = data.global.totalVotos;
-				
-				for (var i = 0; i < data.global.recuento.length; i++) {
-					var c = data.global.recuento[i];
-					$scope.candidatos.push(c.candidato);
-				}
-
-				for (var i = 0; i < data.escuelas.length; i++) {
-					var c = data.escuelas[i];
-					$scope.escuelas.push(c.escuela.nombre);
-				}
-				
-				$scope.r = data.global;
+				$scope.candidatos = data.candidatos;
+				$scope.sectores = Object.keys(data.votosEmitidos);
 				$scope.pintarGrafico();
 			})
-		
-		$scope.porcentajeVotos = function(votos, total) {
-			return votos * 100 / total;
-		}
-		
+			
 		$scope.idxCandidato = function(candidato) {
 			for (var i = 0; i < $scope.candidatos.length; i++)
-				if ($scope.candidatos[i].id.id === candidato.id.id)
+				if ($scope.candidatos[i].candidato === candidato)
 					return i;
 			return -1;
 		}
@@ -61,22 +39,8 @@ angular
 			return colores[$scope.idxCandidato(candidato) % colores.length];
 		}
 		
-		$scope.resultadosEscuela = function(escuela) {
-			if (!escuela) {
-				$scope.activo = 'Globales';
-				$scope.r = $scope.resultados.global;
-				$scope.pintarGrafico();
-				return;
-			}
-			for (var i = 0; i < $scope.resultados.escuelas.length; i++) {
-				var c = $scope.resultados.escuelas[i];
-				if (c.escuela.nombre === escuela) {
-					$scope.r = c.recuento;
-					$scope.activo = escuela;
-					$scope.pintarGrafico();
-					break;
-				}
-			}
+		$scope.resultados = function() {
+			// TODO: ir a globales
 		}
 		
 		$scope.pintarGrafico = function() {
@@ -87,12 +51,12 @@ angular
 			
 			var pieChartCanvas = $("#votesPieChart").get(0).getContext("2d");
 			var pieChart = new Chart(pieChartCanvas);
-			var PieData = $scope.r.recuento.map(function(i) {
+			var PieData = $scope.candidatos.map(function(i) {
 				return {
-					value: $scope.porcentajeVotos(i.votos, $scope.r.totalVotos), 
+					value: i.totalPonderado * 100, 
 					color: $scope.colorHexCandidato(i.candidato),
 					highlight: $scope.colorHexCandidato(i.candidato),
-					label: i.candidato.nombre + " " + i.candidato.apellidos
+					label: i.candidato
 				}
 			});
 			var pieOptions = {

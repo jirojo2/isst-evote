@@ -77,23 +77,23 @@ public class CRV
 		{
 			int votosBlanco = CRVDAO.instance.votosBlancoSector(votacion, sector);
 			int totalVotos = CRVDAO.instance.votosSector(votacion, sector);
-			resultados.getVotosBlanco().put(sector, votosBlanco);
-			resultados.getVotosEmitidos().put(sector, totalVotos);
+			resultados.getVotosBlanco().put(sector.nombre(), votosBlanco);
+			resultados.getVotosEmitidos().put(sector.nombre(), totalVotos);
 		}
 		
 		for (Candidato candidato : candidatos)
 		{
 			ResultadosCandidato rc = new ResultadosCandidato();
-			rc.setCandidato(candidato);
+			rc.setCandidato(candidato.nombre() + " " + candidato.apellidos());
 			
 			double totalPonderado = 0.0;
 			
 			for (Sector sector : sectores)
 			{
 				int votos = CRVDAO.instance.votosCandidatoSector(votacion, candidato, sector);
-				int votosSectorValidos = resultados.getVotosEmitidos().get(sector) - resultados.getVotosBlanco().get(sector);
+				int votosSectorValidos = resultados.getVotosEmitidos().get(sector.nombre()) - resultados.getVotosBlanco().get(sector.nombre());
 				totalPonderado += votos * sector.ponderacion() / votosSectorValidos;
-				rc.getVotos().put(sector, votos);
+				rc.getVotos().put(sector.nombre(), votos);
 			}
 			
 			rc.setTotalPonderado(totalPonderado);

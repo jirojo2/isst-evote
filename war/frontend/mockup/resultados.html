@@ -82,13 +82,10 @@ scratch. This page gets rid of all links and provides the needed markup only.
 
 				<!-- Sidebar Menu -->
 				<ul class="sidebar-menu">
-					<li class="header">Resultados por Escuelas</li>
+					<li class="header">Resultados</li>
 					<!-- Optionally, you can add icons to the links -->
 					<li ng-class="{ active: activo == 'Globales' }">
-						<a href ng-click="resultadosEscuela()"><span>Resultados Globales</span></a>
-					</li>
-					<li ng-repeat="escuela in escuelas" ng-class="{ active: activo == escuela }">
-						<a href ng-click="resultadosEscuela(escuela)">{{ escuela }}</a>
+						<a href ng-click="resultados()"><span>Resultados Globales</span></a>
 					</li>
 				</ul>
 				<!-- /.sidebar-menu -->
@@ -117,21 +114,18 @@ scratch. This page gets rid of all links and provides the needed markup only.
 			<!-- Main content -->
 			<section class="content">
 
-				<!-- Cajas Candidatos -->
-				<h1>Resultados por candidato</h1>
-
 				<div class="row">
 
-					<div class="col-md-4 col-sm-6 col-xs-12" ng-repeat="i in r.recuento | orderBy:'votos':true ">
+					<div class="col-md-6 col-sm-6 col-xs-12" ng-repeat="i in candidatos | orderBy:'totalPonderado':true ">
 						<div class="info-box bg-{{ colorCandidato(i.candidato) }}">
 							<span class="info-box-icon"><i class="fa fa-user"></i></span>
 							<div class="info-box-content">
-								<span class="info-box-text">{{ i.candidato.nombre }} {{ i.candidato.apellidos }}</span>
-								<span class="info-box-number">{{ i.votos }} votos</span>
+								<span class="info-box-text" style="font-size: 2.2em;">{{ i.candidato }}</span>
+								<span class="info-box-number"></span>
 								<div class="progress">
-									<div class="progress-bar" style="width: {{ porcentajeVotos(i.votos, r.totalVotos) }}%"></div>
+									<div class="progress-bar" style="width: {{ i.totalPonderado*100 }}%"></div>
 								</div>
-								<span class="progress-description"> {{ porcentajeVotos(i.votos, r.totalVotos) | number:2 }}% </span>
+								<span class="progress-description">{{ i.totalPonderado*100 | number:2 }}%</span>
 							</div>
 							<!-- /.info-box-content -->
 						</div>
@@ -141,22 +135,64 @@ scratch. This page gets rid of all links and provides the needed markup only.
 				</div>
 
 				<!-- Chart Votos -->
-				<h1>Resultados por votos</h1>
 				<div class="row">
-					<div class='col-md-8'>
-						<div class="chart-responsive">
-							<canvas id="votesPieChart" height="270"></canvas>
+					<div class="col-md-6">
+						<div class="box box-warning">
+							<div class="box-header with-border">
+								<h3 class="box-title">Gráfico de resultados</h3>
+							</div>
+							<div class="box-body">
+								<div class="row">
+									<div class='col-md-8'>
+										<div class="chart-responsive">
+											<canvas id="votesPieChart" height="270"></canvas>
+										</div>
+										<!-- ./chart-responsive -->
+									</div>
+									<div class="col-md-4">
+										<ul class="chart-legend clearfix">
+											<li ng-repeat="i in candidatos">
+												<i class="fa fa-circle-o text-{{ colorCandidato(i.candidato) }}"></i> 
+												{{ i.candidato }}
+											</li>
+										</ul>
+									</div>
+								</div>
+							</div>
 						</div>
-						<!-- ./chart-responsive -->
 					</div>
-					<!-- /.col -->
-					<div class="col-md-4">
-						<ul class="chart-legend clearfix">
-							<li ng-repeat="i in r.recuento">
-								<i class="fa fa-circle-o text-{{ colorCandidato(i.candidato) }}"></i> 
-								{{ i.candidato.nombre }} {{ i.candidato.apellidos }}
-							</li>
-						</ul>
+					<div class="col-md-6">
+						<div class="box box-primary">
+							<div class="box-header with-border">
+								<h3 class="box-title">Desglose de votos</h3>
+							</div>
+							<div class="box-body">
+								<table class="table table-stripped table-hover">
+									<thead>
+										<th></th>
+										<th ng-repeat="sector in sectores">{{ sector }}</th>
+									</thead>
+									<tr>
+										<th>Emitidos</th>
+										<td ng-repeat="sector in sectores">{{ resultados.votosEmitidos[sector] }}</td>
+									</tr>
+									<tr>
+										<th>En blanco</th>
+										<td ng-repeat="sector in sectores">
+											{{ resultados.votosBlanco[sector] }}
+											(<i>{{ resultados.votosBlanco[sector] * 100 / resultados.votosEmitidos[sector] | number:2}}%</i>)
+										</td>
+									</tr>
+									<tr ng-repeat="candidato in candidatos">
+										<th>{{ candidato.candidato }}</th>
+										<td ng-repeat="sector in sectores">
+											{{ candidato.votos[sector] }}
+											(<i>{{ candidato.votos[sector] * 100 / resultados.votosEmitidos[sector] | number:2}}%</i>)
+										</td>
+									</tr>
+								</table>
+							</div>
+						</div>
 					</div>
 				</div>
 

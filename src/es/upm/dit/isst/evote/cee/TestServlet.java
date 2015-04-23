@@ -1,6 +1,7 @@
 package es.upm.dit.isst.evote.cee;
 
 import java.io.IOException;
+import java.util.Date;
 import java.util.HashMap;
 
 import javax.servlet.http.HttpServlet;
@@ -21,14 +22,21 @@ public class TestServlet extends HttpServlet
 
 		res.setContentType("application/json; charset=UTF-8");
 		
-		HashMap<String, String> datos = new HashMap<String, String>();
-		datos.put("test", "alpha");
-		datos.put("resultado", "ok");
+		long tic = new Date().getTime();
 		
 		Simulator sim = new Simulator();
 		
+		sim.setPort(req.getServerPort());
+		sim.setHostname(req.getServerName());
 		sim.borrarDatos();
 		sim.run();
+		
+		long toc = new Date().getTime();
+		int ellapsedMilliseconds = (int)(toc - tic);
+		
+		HashMap<String, Integer> datos = new HashMap<String, Integer>();
+		datos.put("votosEmitidos", sim.getTotalVotosEmitidos());
+		datos.put("ellapsedMilliseconds", ellapsedMilliseconds);
 		
 		try
 		{

@@ -2,26 +2,23 @@ package es.upm.dit.isst.evote.crv.json;
 
 import java.util.HashMap;
 
-import es.upm.dit.isst.evote.model.Candidato;
-import es.upm.dit.isst.evote.model.Sector;
-
 public class ResultadosCandidato 
 {
-	private Candidato candidato;
+	private String candidato;
 	private Double totalPonderado;
-	private HashMap<Sector, Integer> votos;
+	private HashMap<String, Integer> votos = new HashMap<String, Integer>();
 	
 	public ResultadosCandidato()
 	{
 		
 	}
 
-	public Candidato getCandidato()
+	public String getCandidato()
 	{
 		return candidato;
 	}
 
-	public void setCandidato(Candidato candidato)
+	public void setCandidato(String candidato)
 	{
 		this.candidato = candidato;
 	}
@@ -36,12 +33,12 @@ public class ResultadosCandidato
 		this.totalPonderado = totalPonderado;
 	}
 
-	public HashMap<Sector, Integer> getVotos()
+	public HashMap<String, Integer> getVotos()
 	{
 		return votos;
 	}
 
-	public void setVotos(HashMap<Sector, Integer> votos)
+	public void setVotos(HashMap<String, Integer> votos)
 	{
 		this.votos = votos;
 	}

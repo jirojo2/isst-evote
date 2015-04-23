@@ -25,12 +25,36 @@ public class ProcesarVotoServlet extends HttpServlet
 	@Override
 	public void doPost(HttpServletRequest req, HttpServletResponse res)
 	{
-		long id_votacion = Long.parseLong(req.getParameter("id_votacion"));
-		long id_cee = Long.parseLong(req.getParameter("id_cee"));
-		long id_sector = Long.parseLong(req.getParameter("id_sector"));
-		long id_candidato = Long.parseLong(req.getParameter("id_candidato"));
-		long timestamp = Long.parseLong(req.getParameter("timestamp"));
-		long nonce = Long.parseLong(req.getParameter("nonce"));
+		long id_votacion = 0;
+		long id_cee = 0;
+		long id_sector = 0;
+		long id_candidato = 0;
+		long timestamp = 0;
+		long nonce = 0;
+		try 
+		{
+			id_votacion = Long.parseLong(req.getParameter("id_votacion"));
+			id_cee = Long.parseLong(req.getParameter("id_cee"));
+			id_sector = Long.parseLong(req.getParameter("id_sector"));
+			id_candidato = Long.parseLong(req.getParameter("id_candidato"));
+			timestamp = Long.parseLong(req.getParameter("timestamp"));
+			nonce = Long.parseLong(req.getParameter("nonce"));
+		}
+		catch (NumberFormatException e)
+		{
+			try
+			{
+				PrintWriter out = res.getWriter();
+				out.write("Parámetros incorrectos");
+				out.close();
+			} 
+			catch (IOException e1)
+			{
+				e1.printStackTrace();
+			}
+			return;
+		}
+		
 		String firma = req.getParameter("firma");
 		
 		Votacion votacion = CRVDAO.instance.findVotacionById(id_votacion);

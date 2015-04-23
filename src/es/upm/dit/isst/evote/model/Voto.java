@@ -113,6 +113,11 @@ public class Voto implements Serializable
 		return timestampEmitido;
 	}
 	
+	public long nonce()
+	{
+		return nonce;
+	}
+	
 	public String firma()
 	{
 		return firma;
@@ -129,7 +134,7 @@ public class Voto implements Serializable
 	 * Incluye los campos id_votacion, id_cee, id_mesa, id_candidato, timestamp (CEE), nonce (CEE)
 	 * @return ByteBuffer preparado para comprobar la firma del voto con la clave pública del CEE
 	 */
-	public ByteBuffer datosParaValidarFirma()
+	public byte[] datosParaValidarFirma()
 	{
 		ByteBuffer buffer = ByteBuffer.allocate(48);
 		buffer.putLong(votacion.id().getId());
@@ -138,6 +143,6 @@ public class Voto implements Serializable
 		buffer.putLong(candidato.id().getId());
 		buffer.putLong(timestampEmitido);
 		buffer.putLong(nonce);
-		return buffer;
+		return buffer.array();
 	}
 }

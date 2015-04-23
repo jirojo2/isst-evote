@@ -1,231 +1,36 @@
 {
-	"global": {
-		"totalVotos": 12180,
-		"ganador": {
-			"id": {
-				"kind": "Candidato",
-				"id": 5629499534213120
-			},
-			"nombre": "José Ignacio",
-			"apellidos": "Rojo Rivero",
-			"nif": "05466628B"
-		},
-		"recuento": [
-			{
-				"candidato": {
-					"id": {
-						"kind": "Candidato",
-						"id": 5066549580791808
-					},
-					"nombre": "Roberto",
-					"apellidos": "Paterna Ferrón",
-					"nif": "05466628B"
-				},
-				"votos": 3990
-			},
-			{
-				"candidato": {
-					"id": {
-						"kind": "Candidato",
-						"id": 5629499534213120
-					},
-					"nombre": "José Ignacio",
-					"apellidos": "Rojo Rivero",
-					"nif": "05466628B"
-				},
-				"votos": 5180
-			},
-			{
-				"candidato": {
-					"id": {
-						"kind": "Candidato",
-						"id": 6192449487634432
-					},
-					"nombre": "Jorge",
-					"apellidos": "Díez de la Fuente",
-					"nif": "05466628B"
-				},
-				"votos": 3110
-			}
-		]
-	},
-	"escuelas": [
-		{
-			"escuela": {
-				"id": {
-					"kind": "Escuela",
-					"id": 4644337115725824
-				},
-				"nombre": "ETSII"
-			},
-			"recuento": {
-				"totalVotos": 4130,
-				"ganador": {
-					"id": {
-						"kind": "Candidato",
-						"id": 5629499534213120
-					},
-					"nombre": "José Ignacio",
-					"apellidos": "Rojo Rivero",
-					"nif": "00000000X"
-				},
-				"recuento": [
-					{
-						"candidato": {
-							"id": {
-								"kind": "Candidato",
-								"id": 5066549580791808
-							},
-							"nombre": "Roberto",
-							"apellidos": "Paterna Ferrón",
-							"nif": "00000000Y"
-						},
-						"votos": 990
-					},
-					{
-						"candidato": {
-							"id": {
-								"kind": "Candidato",
-								"id": 5629499534213120
-							},
-							"nombre": "José Ignacio",
-							"apellidos": "Rojo Rivero",
-							"nif": "00000000X"
-						},
-						"votos": 2130
-					},
-					{
-						"candidato": {
-							"id": {
-								"kind": "Candidato",
-								"id": 6192449487634432
-							},
-							"nombre": "Jorge",
-							"apellidos": "Díez de la Fuente",
-							"nif": "00000000Z"
-						},
-						"votos": 1110
-					}
-				]
-			}
-		},
-		{
-			"escuela": {
-				"id": {
-					"kind": "Escuela",
-					"id": 4644337115725945
-				},
-				"nombre": "ETSA"
-			},
-			"recuento": {
-				"totalVotos": 3800,
-				"ganador": {
-					"id": {
-						"kind": "Candidato",
-						"id": 6192449487634432
-					},
-					"nombre": "Jorge",
-					"apellidos": "Díez de la Fuente",
-					"nif": "00000000Z"
-				},
-				"recuento": [
-					{
-						"candidato": {
-							"id": {
-								"kind": "Candidato",
-								"id": 5066549580791808
-							},
-							"nombre": "Roberto",
-							"apellidos": "Paterna Ferrón",
-							"nif": "00000000Y"
-						},
-						"votos": 750
-					},
-					{
-						"candidato": {
-							"id": {
-								"kind": "Candidato",
-								"id": 5629499534213120
-							},
-							"nombre": "José Ignacio",
-							"apellidos": "Rojo Rivero",
-							"nif": "00000000X"
-						},
-						"votos": 1250
-					},
-					{
-						"candidato": {
-							"id": {
-								"kind": "Candidato",
-								"id": 6192449487634432
-							},
-							"nombre": "Jorge",
-							"apellidos": "Díez de la Fuente",
-							"nif": "00000000Z"
-						},
-						"votos": 1800
-					}
-				]
-			}
-		},
-		{
-			"escuela": {
-				"id": {
-					"kind": "Escuela",
-					"id": 5348024557502464
-				},
-				"nombre": "ETSIT"
-			},
-			"recuento": {
-				"totalVotos": 4250,
-				"ganador": {
-					"id": {
-						"kind": "Candidato",
-						"id": 5066549580791808
-					},
-					"nombre": "Roberto",
-					"apellidos": "Paterna Ferrón",
-					"nif": "00000000Y"
-				},
-				"recuento": [
-					{
-						"candidato": {
-							"id": {
-								"kind": "Candidato",
-								"id": 5066549580791808
-							},
-							"nombre": "Roberto",
-							"apellidos": "Paterna Ferrón",
-							"nif": "00000000Y"
-						},
-						"votos": 2250
-					},
-					{
-						"candidato": {
-							"id": {
-								"kind": "Candidato",
-								"id": 5629499534213120
-							},
-							"nombre": "José Ignacio",
-							"apellidos": "Rojo Rivero",
-							"nif": "00000000X"
-						},
-						"votos": 1800
-					},
-					{
-						"candidato": {
-							"id": {
-								"kind": "Candidato",
-								"id": 6192449487634432
-							},
-							"nombre": "Jorge",
-							"apellidos": "Díez de la Fuente",
-							"nif": "00000000Z"
-						},
-						"votos": 200
-					}
-				]
-			}
-		}
-	]
+  "votosEmitidos": {
+    "Personal de administración y servicios": 143,
+    "Resto del profesorado y personal investigador": 167,
+    "Estudiantes": 1351,
+    "Profesores doctores con vinculación permanente": 57
+  },
+  "votosBlanco": {
+    "Personal de administración y servicios": 17,
+    "Resto del profesorado y personal investigador": 15,
+    "Estudiantes": 138,
+    "Profesores doctores con vinculación permanente": 7
+  },
+  "candidatos": [
+    {
+      "candidato": "Guillermo Cisneros",
+      "totalPonderado": 0.5152039751410484,
+      "votos": {
+        "Personal de administración y servicios": 66,
+        "Resto del profesorado y personal investigador": 79,
+        "Estudiantes": 605,
+        "Profesores doctores con vinculación permanente": 26
+      }
+    },
+    {
+      "candidato": "Carlos Conde",
+      "totalPonderado": 0.48479602858424187,
+      "votos": {
+        "Personal de administración y servicios": 60,
+        "Resto del profesorado y personal investigador": 73,
+        "Estudiantes": 608,
+        "Profesores doctores con vinculación permanente": 24
+      }
+    }
+  ]
 }
