@@ -2,6 +2,7 @@ package es.upm.dit.isst.evote.crv;
 
 import java.io.IOException;
 
+import javax.persistence.EntityManager;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -9,6 +10,7 @@ import javax.servlet.http.HttpServletResponse;
 import com.google.gson.Gson;
 
 import es.upm.dit.isst.evote.crv.dao.CRVDAO;
+import es.upm.dit.isst.evote.crv.dao.EMFService;
 import es.upm.dit.isst.evote.crv.json.Resultados;
 import es.upm.dit.isst.evote.model.Votacion;
 
@@ -31,7 +33,6 @@ public class ResultadosVotacionServlet extends HttpServlet
 		}
 		
 		Votacion votacion = CRVDAO.instance.findVotacionById(id_votacion);
-		Resultados resultados = CRV.instance.resultados(votacion);
 		
 		Gson gson = new Gson();
 		
@@ -39,7 +40,26 @@ public class ResultadosVotacionServlet extends HttpServlet
 		
 		try
 		{
-			res.getWriter().println(gson.toJson(resultados));
+			if (votacion.tieneCacheResultado())
+			{
+				res.getWriter().println(votacion.cacheResultadoJSON());	
+				System.out.println("Mostrando resultados desde cache de votación");
+			}
+			else 
+			{
+				Resultados resultados = CRV.instance.resultados(votacion);
+				String resultadosJSON = gson.toJson(resultados);
+				
+				EntityManager em = EMFService.get().createEntityManager();
+				Votacion v = em.find(Votacion.class, votacion.id());
+				em.getTransaction().begin();
+				v.cacheResultadoJSON(resultadosJSON);
+				em.getTransaction().commit();
+				em.close();
+				
+				res.getWriter().println(resultadosJSON);
+				System.out.println("Guardando resultados en cache de votación");
+			}
 			res.getWriter().close();
 		} 
 		catch (IOException e)

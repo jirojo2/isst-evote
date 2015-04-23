@@ -28,6 +28,14 @@ public class TestServlet extends HttpServlet
 		
 		sim.setPort(req.getServerPort());
 		sim.setHostname(req.getServerName());
+		
+		// Cómo sincronizo las bases de datos?!
+		if ("gae".equals(req.getParameter("target")))
+		{
+			sim.setHostname("isst-crv.appspot.com");
+			sim.setPort(80);
+		}		
+		
 		sim.borrarDatos();
 		sim.run();
 		

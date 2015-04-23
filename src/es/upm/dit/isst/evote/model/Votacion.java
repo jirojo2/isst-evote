@@ -9,6 +9,7 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 
 import com.google.appengine.api.datastore.Key;
+import com.google.appengine.api.datastore.Text;
 
 @Entity
 public class Votacion implements Serializable
@@ -22,6 +23,8 @@ public class Votacion implements Serializable
 	private String nombre;	
 	private Date fechaInicio;
 	private Date fechaFin;
+	
+	private Text cacheResultadoJSON;
 	
 	public Key id()
 	{
@@ -46,5 +49,20 @@ public class Votacion implements Serializable
 	public Date fechaFin()
 	{
 		return fechaFin;
+	}
+	
+	public String cacheResultadoJSON()
+	{
+		return cacheResultadoJSON.getValue();
+	}
+	
+	public void cacheResultadoJSON(String value)
+	{
+		cacheResultadoJSON = new Text(value);
+	}
+	
+	public boolean tieneCacheResultado()
+	{
+		return cacheResultadoJSON != null && cacheResultadoJSON.getValue() != null;
 	}
 }
