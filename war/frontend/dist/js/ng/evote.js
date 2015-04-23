@@ -10,15 +10,17 @@ angular
 		$scope.sectores = [];
 		
 		$scope.grafico = null;
+		$scope.loading = true;
 		
 		window.scope = $scope;
 		
 		$http
-			.get('/dist/js/ng/resultados.json')
+			.get('/resultados')
 			.success(function(data) {
 				$scope.resultados = data;
 				$scope.candidatos = data.candidatos;
 				$scope.sectores = Object.keys(data.votosEmitidos);
+				$scope.loading = false;
 				$scope.pintarGrafico();
 			})
 			

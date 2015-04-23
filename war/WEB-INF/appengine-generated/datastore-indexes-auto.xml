@@ -1,13 +1,13 @@
-<!-- Indices written at Thu, 23 Apr 2015 18:42:04 CEST -->
+<!-- Indices written at Thu, 23 Apr 2015 20:38:40 CEST -->
 
 <datastore-indexes>
 
-    <!-- Used 2 times in query history -->
+    <!-- Used 1 time in query history -->
     <datastore-index kind="Votacion" ancestor="false" source="auto">
         <property name="__key__" direction="desc"/>
     </datastore-index>
 
-    <!-- Used 4 times in query history -->
+    <!-- Used 2 times in query history -->
     <datastore-index kind="Candidato" ancestor="false" source="auto">
         <property name="votacion_id" direction="asc"/>
         <property name="nif" direction="asc"/>
