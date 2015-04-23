@@ -181,6 +181,7 @@ public class Simulator
 			
 	        URL url = new URL("http://" + hostname + ":" + port + "/sync");
 	        HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+	        connection.setReadTimeout(30000);
 	        connection.setDoOutput(true);
 	        connection.setRequestMethod("POST");
 	        connection.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
@@ -329,6 +330,7 @@ public class Simulator
 			
 	        URL url = new URL("http://" + hostname + ":" + port + "/voto");
 	        HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+	        connection.setReadTimeout(30000);
 	        connection.setDoOutput(true);
 	        connection.setRequestMethod("POST");
 	        connection.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");

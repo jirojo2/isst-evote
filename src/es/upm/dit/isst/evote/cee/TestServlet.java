@@ -32,7 +32,7 @@ public class TestServlet extends HttpServlet
 		// Cómo sincronizo las bases de datos?!
 		if ("gae".equals(req.getParameter("target")))
 		{
-			sim.setHostname("isst-crv.appspot.com");
+			sim.setHostname("isst-crv-test.appspot.com");
 			sim.setPort(80);
 		}
 		
