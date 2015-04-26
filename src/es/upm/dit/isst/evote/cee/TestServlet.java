@@ -25,15 +25,27 @@ public class TestServlet extends HttpServlet
 		long tic = new Date().getTime();
 		
 		Simulator sim = new Simulator();
-		
-		sim.setPort(req.getServerPort());
-		sim.setHostname(req.getServerName());
+
+		sim.setBaseURL("http://" + req.getServerName() + ":" + req.getServerPort());
 		
 		// Cómo sincronizo las bases de datos?!
 		if ("gae".equals(req.getParameter("target")))
 		{
-			sim.setHostname("isst-crv-test.appspot.com");
-			sim.setPort(80);
+			sim.setBaseURL("http://isst-crv-test.appspot.com");
+		}
+		else if ("node".equals(req.getParameter("target")))
+		{
+			sim.setBaseURL("http://jirojo.me/isst-evote");
+		}
+		
+		try 
+		{
+			long votacionExistente = Long.parseLong(req.getParameter("votacion"));
+			sim.setVotacionExistente(votacionExistente);
+		}
+		catch (Exception e) 
+		{
+			// No hacer nada
 		}
 		
 		sim.run();

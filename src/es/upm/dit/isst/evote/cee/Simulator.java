@@ -112,17 +112,18 @@ public class Simulator
 	private Map<Long, Integer> censo;
 	
 	private int totalVotosEmitidos = 0;
-	private int port;
-	private String hostname;
+	private String baseURL;
 	
-	public void setHostname(String value)
+	private long votacionExistente = 0;
+	
+	public void setBaseURL(String value)
 	{
-		hostname = value;
+		baseURL = value;
 	}
 	
-	public void setPort(int value)
+	public void setVotacionExistente(long value)
 	{
-		port = value;
+		votacionExistente = value;
 	}
 	
 	/**
@@ -178,8 +179,12 @@ public class Simulator
 	    {
 			Gson gson = new Gson();
 			String encodedData = "key=" + URLEncoder.encode(Base64.encodeBase64String(publicKeyCEE.getEncoded()), "UTF-8");
+			if (votacionExistente != 0)
+			{
+				encodedData += "&votacion=" + votacionExistente;
+			}
 			
-	        URL url = new URL("http://" + hostname + ":" + port + "/sync");
+	        URL url = new URL(baseURL + "/sync");
 	        HttpURLConnection connection = (HttpURLConnection) url.openConnection();
 	        connection.setReadTimeout(30000);
 	        connection.setDoOutput(true);
@@ -202,6 +207,9 @@ public class Simulator
 	        	sectores = sv.getSectores();
 	        	blanco = sv.getBlanco();
 	        	candidatos = sv.getCandidatos();
+	        	
+	        	System.out.format("Votación de prueba con id %s", votacion.id());
+	        	System.out.println();
 	        	
 	        	return true;
 	        } 
@@ -328,7 +336,7 @@ public class Simulator
 			encodedData += "&nonce=" + URLEncoder.encode(String.valueOf(voto.nonce()), "UTF-8");
 			encodedData += "&firma=" + URLEncoder.encode(voto.firma(), "UTF-8");
 			
-	        URL url = new URL("http://" + hostname + ":" + port + "/voto");
+	        URL url = new URL(baseURL + "/voto");
 	        HttpURLConnection connection = (HttpURLConnection) url.openConnection();
 	        connection.setReadTimeout(30000);
 	        connection.setDoOutput(true);
